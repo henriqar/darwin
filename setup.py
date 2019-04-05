@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from setuptools import setup, Extension
+from setuptools import setup, find_packages, Extension
 
 opt_extension = Extension(
     name='_opt',
@@ -16,7 +16,7 @@ setup(
     license="MIT",
     keywords="",
     url="",
-    packages="",
+    packages=find_packages(),
     classifiers=[
         "Development Status :: 1 - Planning",
         "License :: OSI Approved :: MIT License"
