@@ -1,1 +1,2 @@
-pytest
+pytest>=4.4.0
+htcondor>=8.9.0
