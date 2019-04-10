@@ -1,50 +1,58 @@
 
-import itertools
-import copy
 
-class Map:
+from type import MappingProxyType
 
-    def __init__(self, iterable):
+class Map(MappingProxyType):
 
-        if isinstance(iterable, tuple):
-            # force iterable to be tuple, not modifyable
-            self.iterable = set(iterable)
+    def __init__(self, data):
+
+        try:
+            iterator = iter(data)
+        except TypeError:
+            pass
         else:
-            raise TypeError("map iterable must be a tuple type")
+            pass
 
-    def __add__(self, other):
-        return Map(tuple(self.iterable) + tuple(other.iterable))
-
-    def __iadd__(self, other):
-        return Map(self.iterable + (other,))
-
-    def __radd__(self, other):
-        return Map(other.iterable + self.iterable)
-
-    def __sub__(self, other):
+    def generate_uniform_random_number(self):
         pass
 
-    def __isub__(self, other):
+    def generate_gaussian_random_number(self):
         pass
 
-    def __rsub__(self, other):
+    def generate_cauchy_random_number(self):
         pass
 
-    def __mul__(self, other):
-        return Map(tuple(itertools.product(self.iterable, other.iterable)))
-
-    def __imul__(self, other):
-        return Map(tuple(itertools.product(self.iterable, (other,))))
-
-    def __rmul__(self, other):
-        return Map(tuple(itertools.product(other.iterable, self.iterable)))
-
-    def __div__(self, other):
+    def generate_levy_distribution(self):
         pass
 
-    def __idiv__(self, other):
+    def euclidean_distance(self):
         pass
 
-    def __rdiv__(self, other):
+    def get_perpendicular_vector(self):
         pass
+
+    def normalize_vector(self):
+        pass
+
+    def sort_agent(self):
+        pass
+
+    def sort_data_by_val(self):
+        pass
+
+    def waive_comment(self):
+        pass
+
+    def read_searchspace_from_file(self):
+        pass
+
+    def get_FUNCTION_id(self):
+        pass
+
+    def roulette_selection(self):
+        pass
+
+    def roultte_selection_ga(self):
+        pass
+
 
