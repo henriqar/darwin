@@ -1,14 +1,14 @@
 
 import abc
 
-class execution(abc.ABC):
+class mediator(abc.ABC):
 
     @abstractmethod
-    def register_job (self, job):
+    def register_job(self, job):
         pass
 
     @abstractmethod
-    def exec_jobs(Self):
+    def exec_job(self):
         pass
 
     @abstractmethod
@@ -18,7 +18,3 @@ class execution(abc.ABC):
     @abstractmethod
     def whisper(self):
         pass
-
-
-
-
