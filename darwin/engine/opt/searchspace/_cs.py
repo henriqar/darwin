@@ -1,0 +1,3 @@
+
+class cs:
+    pass

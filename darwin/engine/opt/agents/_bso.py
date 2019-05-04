@@ -1,0 +1,3 @@
+
+class bso:
+    pass

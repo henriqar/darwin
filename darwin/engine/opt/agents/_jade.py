@@ -1,0 +1,3 @@
+
+class jade:
+    pass

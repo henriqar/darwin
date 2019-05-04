@@ -1,0 +1,3 @@
+
+class bsa:
+    pass

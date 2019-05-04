@@ -1,0 +1,3 @@
+
+class de:
+    pass
