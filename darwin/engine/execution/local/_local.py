@@ -13,7 +13,7 @@ class local(mediator):
         spfct.init_factory()
 
         # get the searchspace used
-        opt_searchspace = spfct.create_searchspace(self._opt)
+        opt_searchspace = spfct.create_searchspace(self._opt, self._kwargs)
 
         # get the number of agent used
         agents = []

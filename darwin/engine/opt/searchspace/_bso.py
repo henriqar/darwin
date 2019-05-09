@@ -3,10 +3,26 @@ from .searchspace import searchspace
 
 class bso(searchspace):
 
-    def __init__(self):
+    def __init__(self, k=None, p_one_cluster=None, p_one_center=None, p_two_center=None):
 
         # call super from searchspace base class
         super().__init__()
+
+        if k == None:
+            print('error: BSO requires that "k" be set')
+            sys.exit(1)
+
+        if p_one_cluster == None:
+            print('error: BSO requires that "p_one_cluster" be set')
+            sys.exit(1)
+
+        if p_one_center == None:
+            print('error: BSO requires that "p_one_center" be set')
+            sys.exit(1)
+
+        if p_two_center == None:
+            print('error: BSO requires that "p_two_center" be set')
+            sys.exit(1)
 
         # BSO
         self._p_one_cluster = 0.0 # probability of selecting a cluster center

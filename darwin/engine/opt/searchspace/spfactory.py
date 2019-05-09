@@ -28,6 +28,5 @@ class spfactory():
         spfactory.searchspace_init['wca'] = wca
 
     @staticmethod
-    def create_searchspace(id):
-
-        return spfactory.searchspace_init[id]()
+    def create_searchspace(id, kwarg_dict):
+        return spfactory.searchspace_init[id](**kwarg_dict)

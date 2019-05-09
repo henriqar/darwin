@@ -19,5 +19,8 @@ opt.set_function(Quadratic)
 opt.set_agents(10)
 opt.set_max_iterations(10)
 
+# exclusive GA parameters
+opt.set_mutation_probability(0.2)
+
 opt.start()
 

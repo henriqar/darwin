@@ -3,10 +3,22 @@ from .searchspace import searchspace
 
 class fa(searchspace):
 
-    def __init__(self):
+    def __init__(self, alpha=None, beta=None, gamma=None):
 
         # call super from searchspace base class
         super().__init__()
+
+        if alpha == None:
+            print('error: FA requires that "alpha" be set')
+            sys.exit(1)
+
+        if beta == None:
+            print('error: FA requires that "beta" be set')
+            sys.exit(1)
+
+        if gamma == None:
+            print('error: FA requires that "gamma" be set')
+            sys.exit(1)
 
         # FA
         self._alpha = 0  # randomized parameter

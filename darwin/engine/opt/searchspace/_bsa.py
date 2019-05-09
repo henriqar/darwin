@@ -3,10 +3,18 @@ from .searchspace import searchspace
 
 class bsa(searchspace):
 
-    def __init__(self):
+    def __init__(self, mix_rate=None, F=None):
 
         # call super from searchspace base class
         super().__init__()
+
+        if mix_rate == None:
+            print('error: BSA requires that "mix_rate" be set')
+            sys.exit(1)
+
+        if F == None:
+            print('error: BSA requires that "F" be set')
+            sys.exit(1)
 
         # BSA
         self._mix_rate = 0.0 # controls the number of elements of individuals that will mutate in a trial
