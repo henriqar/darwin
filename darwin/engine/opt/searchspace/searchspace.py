@@ -32,9 +32,8 @@ class searchspace(abc.ABC):
         self._pb = 0.0 # probability to execute DE according to the covariance matrix learning
         self._ps = 0.0 # proportion of the individuals chosen from the current population to calculate the covariance matrix
 
-    @abc.abstractmethod
     def show(self):
-        pass
+        print('Search space with {} agents and {} decision variables'.format(self._m, self._n))
 
     @abc.abstractmethod
     def evaluate(self):

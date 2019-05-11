@@ -26,11 +26,32 @@ class fa(searchspace):
         self._gamma = 0 # light absorption
 
     def show(self):
-        pass
+
+        # call super to show basic data
+        super.show()
+
+        for i in range(self._m):
+
+            print(f'Agent {i} -> ', end='')
+            for j in range(self._n):
+                fit = self._a[i].x[j]
+                print(f'x[{j}]: {fit}   ', end='')
+            print('fitness value: {}'.format(self._a[i].fit))
 
     def evaluate(self):
         pass
 
-    def check(self):
-        pass
+    def check():
+
+        if not isinstance(self._alpha, float):
+            print(' -> Randomized parameter undefined')
+            return 1
+        elif not isinstance(self._beta_0, float):
+            print(' -> Attractiveness undefined')
+            return 1
+        elif not isinstance(self._gamma, float):
+            print(' -> Light absorption undefined.')
+            return 1
+        else:
+            return 0
 

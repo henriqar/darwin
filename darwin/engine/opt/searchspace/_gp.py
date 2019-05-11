@@ -34,14 +34,26 @@ class gp(searchspace):
         self._constant = [] # matrix with the random constants
         self._T = 0.0 # pointer to the tree
 
+        self._tree_fit = 0.0 # fitness of each tree (in GP, the number of agents is different from the number of trees)
+
     def show(self):
-        pass
+
+        # call super to show basic data
+        super.show()
+
+        for i in range(self._m):
+            fit = self._a[i].fit
+            print(f'Agent {i} -> fitness value: {fit}', end='')
 
     def evaluate(self):
         pass
 
     def check(self):
-        pass
-        self._tree_fit = 0.0 # fitness of each tree (in GP, the number of agents is different from the number of trees)
+
+        if not isinstance(self._pMutation, float):
+            print(' -> Probability of mutation undefined')
+            return 1
+        else:
+            return 0
 
 

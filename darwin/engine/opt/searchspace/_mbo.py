@@ -27,10 +27,38 @@ class mbo(searchspace):
         self._k = k # number of neighbours solutions to be considered for MBO or number of clusters for BSO
 
     def show(self):
-        pass
+
+        # call super to show basic data
+        super.show()
+
+        for i in range(self._m):
+
+            print(f'Agent {i} -> ', end='')
+            for j in range(self._n):
+                fit = self._a[i].x[j]
+                print(f'x[{j}]: {fit}   ', end='')
+
+            print('fitness value: {}'.format(self._a[i].fit))
 
     def evaluate(self):
         pass
 
     def check(self):
-        pass
+
+        if not isinstance(self._k, float):
+            print(' -> Number of neighbours solutions to be considered undefined')
+            return 1
+        elif not isinstance(self._X, float):
+            print(' -> Number of neighbour solutions to be shared with the next solution undefined')
+            return 1
+        elif not isinstance(self._M, float):
+            print(' -> Number of tours undefined')
+            return 1
+        elif self._X >= self._k:
+            print(' -> Number of neighbour shared should be smaller than the number of neighbours considered')
+            return 1
+        elif self._m < 3:
+            print(' -> Number of birds should be bigger than or equal to 3')
+            return 1
+        else:
+            return 0

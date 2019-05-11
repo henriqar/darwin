@@ -16,10 +16,25 @@ class abc(searchspace):
         self._limit = 0.0 # number of trial limits for each food source
 
     def show(self):
-        pass
+
+        # call super to show basic data
+        super.show()
+
+        for i in range(self._m):
+
+            print(f'Agent {i} -> ', end='')
+            for j in range(self._n):
+                fit = self._a[i].x[j]
+                print(f'x[{j}]: {fit}   ', end='')
+            print('fitness value: {}'.format(self._a[i].fit))
 
     def evaluate(self):
         pass
 
     def check(self):
-        pass
+
+        if not isinstance(self._limit, float):
+            print(' -> Number of trial limits must be greater than 0')
+            return 1
+        else:
+            return 0

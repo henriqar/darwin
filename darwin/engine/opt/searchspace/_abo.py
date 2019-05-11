@@ -21,11 +21,29 @@ class abo(searchspace):
         self._step_e = 0.0 #
 
     def show(self):
-        pass
+
+        # call super to show basic data
+        super.show()
+
+        for i in range(self._m):
+
+            print(f'Agent {i} -> ', end='')
+            for j in range(self._n):
+                fit = self._a[i].x[j]
+                print(f'x[{j}]: {fit}   ', end='')
+            print('fitness value: {}'.format(self._a[i].fit))
 
     def evaluate(self):
         pass
 
     def check(self):
-        pass
+
+        if not isinstance(self._ratio_e, float):
+            print(' -> proportion of sunspot butterflies undefined.')
+            return 1
+        elif not isinstance(self._step_e, float):
+            print(' -> step parameter undefined.')
+            return 1
+        else:
+            return 0
 

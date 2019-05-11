@@ -1,4 +1,6 @@
 
+import sys
+
 from .searchspace import searchspace
 
 class pso(searchspace):
@@ -36,11 +38,40 @@ class pso(searchspace):
         self._c2 = c2 # c2 parameter
 
     def show(self):
-        pass
+
+        # call super to show basic data
+        super.show()
+
+        for i in range(self._m):
+
+            print(f'Agent {i} -> ', end='')
+            for j in range(self._n):
+                fit = self._a[i].x[j]
+                print(f'x[{j}]: {fit}   ', end='')
+            print('fitness value: {}'.format(self._a[i].fit))
 
     def evaluate(self):
         pass
 
     def check(self):
-        pass
+
+        if not isinstance(self._w, float):
+            print(' -> Inertia weight undefined')
+            return 1
+        elif not isinstance(self._w_min, float):
+            print(' -> Minimum inertia weight undefined')
+            return 1
+        elif not isinstance(self._w_max, float):
+            print(' -> Maximum inertia weight undefined')
+            return 1
+        elif not isinstance(self._c1, float):
+            print(' -> C1 parameter undefined')
+            return 1
+        elif not isinstance(self._c2, float):
+            print(' -> C2 parameter undefined')
+            return 1
+        else:
+            return 0
+
+
 

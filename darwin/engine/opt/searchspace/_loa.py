@@ -52,10 +52,44 @@ class loa(searchspace):
 
 
     def show(self):
-        pass
+
+        # call super to show basic data
+        super.show()
+
+        for i in range(self._m):
+
+            print(f'Agent {i} -> ', end='')
+            for j in range(self._n):
+                fit = self._a[i].x[j]
+                print(f'x[{j}]: {fit}   ', end='')
+
+            print('fitness value: {}'.format(self._a[i].fit))
 
     def evaluate(self):
         pass
 
     def check(self):
-        pass
+
+        if not isinstance(self._sex_rate, float):
+            print(' -> Sex rate undefined')
+            return 1
+        elif not isinstance(self._nomad_percent, float):
+            print(' -> Nomad percentage undefined')
+            return 1
+        elif not isinstance(self._roaming_percent, float):
+            print(' -> Roaming percentage undefined')
+            return 1
+        elif not isinstance(self._mating_prob, float):
+            print(' -> Mating probability undefined')
+            return 1
+        elif not isinstance(self._imigration_rate, float):
+            print(' -> Imigration rate undefined')
+            return 1
+        elif self._n_prides <= 0:
+            print(' -> Number of prides not valid')
+            return 1
+        elif not isinstance(self._pMutation, float):
+            print(' -> Mutation probability undefined')
+            return 1
+        else:
+            return 0

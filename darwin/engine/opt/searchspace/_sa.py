@@ -27,10 +27,33 @@ class sa(searchspace):
         self._func_param = 0.0 # extra parameter for the cooling schedule functions
 
     def show(self):
-        pass
+
+        # call super to show basic data
+        super.show()
+
+        for i in range(self._m):
+
+            print(f'Agent {i} -> ', end='')
+            for j in range(self._n):
+                fit = self._a[i].x[j]
+                print(f'x[{j}]: {fit}   ', end='')
+
+            print('Boundaries')
+            for j in range(self._n):
+                fit = self._a[i].x[j]
+                UB = 0
+                LB = 0
+                print(f'UB[{j}]: {UB}, LB[{j}]: {LB} ', end='')
+
+            print('fitness value: {}'.format(self._a[i].fit))
 
     def evaluate(self):
         pass
 
     def check(self):
-        pass
+
+        if not isinstance(self._end_temperature, float):
+            print(' -> end temperature undefined')
+            return 1
+        else:
+            return 0

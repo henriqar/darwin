@@ -27,4 +27,12 @@ class bsa(searchspace):
         pass
 
     def check(self):
-        pass
+
+        if not isinstance(self._mix_rate, float):
+            print(' -> Mix Rate undefined')
+            return 1
+        elif self._F < 0:
+            print(' -> F undefined')
+            return 1
+        else:
+            return 0

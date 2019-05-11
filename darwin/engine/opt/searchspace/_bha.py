@@ -9,7 +9,17 @@ class bha(searchspace):
         super().__init__()
 
     def show(self):
-        pass
+
+        # call super to show basic data
+        super.show()
+
+        for i in range(self._m):
+
+            print(f'Agent {i} -> ', end='')
+            for j in range(self._n):
+                fit = self._a[i].x[j]
+                print(f'x[{j}]: {fit}   ', end='')
+            print('fitness value: {}'.format(self._a[i].fit))
 
     def evaluate(self):
         pass
