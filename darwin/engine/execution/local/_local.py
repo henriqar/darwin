@@ -13,10 +13,20 @@ class local(mediator):
         spfct.init_factory()
 
         # get the searchspace used
-        opt_searchspace = spfct.create_searchspace(self._opt, self._kwargs)
+        opt_searchspace = spfct.create_searchspace(
+                self._opt,
+                self._nro_agents,
+                self._nro_decision_vars,
+                self._kwargs)
 
         # get the number of agent used
-        agents = []
-        for i in range(self._nro_agents):
-            agents.append(agtfct.create_agent(self._opt))
+        # agents = []
+        # for i in range(self._nro_agents):
+        #     agents.append(agtfct.create_agent(self._opt))
 
+        d = {}
+        # import pdb; pdb.set_trace()
+        for k, v in self._names.items():
+            d[k] = self._sets[v][0]
+
+        self._func(*d)

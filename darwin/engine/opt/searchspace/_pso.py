@@ -2,13 +2,17 @@
 import sys
 
 from .searchspace import searchspace
+from darwin.engine.opt import agtfactory as agtfct
 
 class pso(searchspace):
 
-    def __init__(self, c1=None, c2=None, w=None, w_min=None, w_max=None):
+    def __init__(self, m, n, c1=None, c2=None, w=None, w_min=None, w_max=None):
 
         # call super from searchspace base class
-        super().__init__()
+        super().__init__(m, n)
+
+        for i in range(m):
+            self._a.append(agtfct.create_agent('pso'))
 
         if c1 == None:
             print('error: PSO searchspace requires a "c1" be set')

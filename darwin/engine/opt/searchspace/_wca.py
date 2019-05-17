@@ -1,12 +1,16 @@
 
 from .searchspace import searchspace
+from darwin.engine.opt import agtfactory as agtfct
 
 class wca(searchspace):
 
-    def __init__(self, nsr=None, dmax=None):
+    def __init__(self, m, n, nsr=None, dmax=None):
 
         # call super from searchspace base class
-        super().__init__()
+        super().__init__(m, n)
+
+        for i in range(m):
+            self._a.append(agtfct.create_agent('wca'))
 
         if nsr == None:
             print('error: WCA searchspace requires a "nsr" be set')

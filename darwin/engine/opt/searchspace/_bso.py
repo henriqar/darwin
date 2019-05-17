@@ -1,12 +1,16 @@
 
 from .searchspace import searchspace
+from darwin.engine.opt import agtfactory as agtfct
 
 class bso(searchspace):
 
-    def __init__(self, k=None, p_one_cluster=None, p_one_center=None, p_two_center=None):
+    def __init__(self, m, n, k=None, p_one_cluster=None, p_one_center=None, p_two_center=None):
 
         # call super from searchspace base class
-        super().__init__()
+        super().__init__(m, n)
+
+        for i in range(m):
+            self._a.append(agtfct.create_agent('bso'))
 
         if k == None:
             print('error: BSO requires that "k" be set')
@@ -24,11 +28,20 @@ class bso(searchspace):
             print('error: BSO requires that "p_two_center" be set')
             sys.exit(1)
 
-        # BSO
-        self._p_one_cluster = 0.0 # probability of selecting a cluster center
-        self._p_one_center = 0.0 # probability of randomly selecting an idea from a probabilistic selected cluster
-        self._p_two_centers = 0.0 # probability of of creating a random combination of two probabilistic selected clusters
-        self._k = 0.0 # number of neighbours solutions to be considered for MBO or number of clusters for BSO
+        # prob of selecting a cluster center
+        self._p_one_cluster = float('nan')
+
+        # prob of randomly selecting an idea from a probabilistic selected
+        # cluster
+        self._p_one_center = float('nan')
+
+        # prob of of creating a random comb of two probabilistic selected
+        # clusters
+        self._p_two_centers = float('nan')
+
+        # number of neighbours solutions to be considered for MBO or number of
+        #clusters for BSO
+        self._k = float('nan')
 
     def show(self):
 

@@ -1,12 +1,16 @@
 
 from .searchspace import searchspace
+from darwin.engine.opt import agtfactory as agtfct
 
 class cs(searchspace):
 
-    def __init__(self, alpha=None, p=None, beta=None):
+    def __init__(self, m, n, alpha=None, p=None, beta=None):
 
         # call super from searchspace base class
-        super().__init__()
+        super().__init__(m, n)
+
+        for i in range(m):
+            self._a.append(agtfct.create_agent('cs'))
 
         if alpha == None:
             print('error: CS requires that "alpha" be set')

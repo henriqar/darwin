@@ -1,12 +1,16 @@
 
 from .searchspace import searchspace
+from darwin.engine.opt import agtfactory as agtfct
 
 class sa(searchspace):
 
-    def __init__(self, initial_temperature=None, final_temperature=None, cooling_schedule=None):
+    def __init__(self, m, n, initial_temperature=None, final_temperature=None, cooling_schedule=None):
 
         # call super from searchspace base class
-        super().__init__()
+        super().__init__(m, n)
+
+        for i in range(m):
+            self._a.append(agtfct.create_agent('sa'))
 
         if initial_temperature == None:
             print('error: SA searchspace requires a "initial_temperature" be set')

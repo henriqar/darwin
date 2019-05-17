@@ -1,5 +1,4 @@
 
-from ._ga import ga
 from ._abc import abc
 from ._abo import abo
 from ._ba import ba
@@ -19,3 +18,4 @@ from ._mbo import mbo
 from ._pso import pso
 from ._sa import sa
 from ._wca import wca
+from ._cobide import cobide

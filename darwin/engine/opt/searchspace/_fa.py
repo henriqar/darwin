@@ -1,12 +1,16 @@
 
 from .searchspace import searchspace
+from darwin.engine.opt import agtfactory as agtfct
 
 class fa(searchspace):
 
-    def __init__(self, alpha=None, beta=None, gamma=None):
+    def __init__(self, m, n, alpha=None, beta=None, gamma=None):
 
         # call super from searchspace base class
-        super().__init__()
+        super().__init__(m, n)
+
+        for i in range(m):
+            self._a.append(agtfct.create_agent('fa'))
 
         if alpha == None:
             print('error: FA requires that "alpha" be set')
@@ -21,9 +25,9 @@ class fa(searchspace):
             sys.exit(1)
 
         # FA
-        self._alpha = 0  # randomized parameter
-        self._beta_0 = 0 # attractiveness
-        self._gamma = 0 # light absorption
+        self._alpha = float('nan')  # randomized parameter
+        self._beta_0 = float('nan') # attractiveness
+        self._gamma = float('nan') # light absorption
 
     def show(self):
 

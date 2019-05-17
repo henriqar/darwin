@@ -5,10 +5,10 @@ from .searchspace import searchspace
 
 class ga(searchspace):
 
-    def __init__(self, mutation_probability=None):
+    def __init__(self, m, n, mutation_probability=None):
 
         # call super from searchspace base class
-        super().__init__()
+        super().__init__(m, n)
 
         if mutation_probability == None:
             print('error: GA searchspace requires a mutation probability value to work')

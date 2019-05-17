@@ -1,12 +1,16 @@
 
 from .searchspace import searchspace
+from darwin.engine.opt import agtfactory as agtfct
 
 class hs(searchspace):
 
-    def __init__(self, HMCR=None, PAR=None, bw=None):
+    def __init__(self, m, n, HMCR=None, PAR=None, bw=None):
 
         # call super from searchspace base class
-        super().__init__()
+        super().__init__(m, n)
+
+        for i in range(m):
+            self._a.append(agtfct.create_agent('hs'))
 
         if HMCR == None:
             print('error: HS searchspace requires a "HMCR" be set')

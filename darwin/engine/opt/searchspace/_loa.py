@@ -1,12 +1,16 @@
 
 from .searchspace import searchspace
+from darwin.engine.opt import agtfactory as agtfct
 
 class loa(searchspace):
 
-    def __init__(self, sex_rate=None, percent_nomad_lions=None, roaming_percent=None, mating_probability=None, immigrating_rate=None, number_of_pride=None):
+    def __init__(self, m, n, sex_rate=None, percent_nomad_lions=None, roaming_percent=None, mating_probability=None, immigrating_rate=None, number_of_pride=None):
 
         # call super from searchspace base class
-        super().__init__()
+        super().__init__(m, n)
+
+        for i in range(m):
+            self._a.append(agtfct.create_agent('loa'))
 
         if sex_rate == None:
             print('error: LOA searchspace requires a "sex_rate" be set')

@@ -60,7 +60,7 @@ class algorithm():
         if isinstance(param, tuple):
             # force mapparam to be tuple, not modifyable
             self._parameter_map[name] = self._param_id
-            self._parameter_sets[self._param_id] = set(param)
+            self._parameter_sets[self._param_id] = param
             self._param_id += 1
             return self._parameter_map[name]
         else:
@@ -114,6 +114,9 @@ class algorithm():
 
         # engine config
         engine.set_nro_agents(self._nro_agents)
+        engine.set_min_function(self._func)
+        engine.set_mappings(self._parameter_map, self._parameter_sets)
+        engine.set_nro_decision_vars(self._param_id)
         engine.execute()
 
     # from here on we will create all methods to store specific parameters for

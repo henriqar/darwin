@@ -1,12 +1,16 @@
 
 from .searchspace import searchspace
+from darwin.engine.opt import agtfactory as agtfct
 
 class abo(searchspace):
 
-    def __init__(self, ratio_e=None, step_e=None):
+    def __init__(self, m, n, ratio_e=None, step_e=None):
 
         # call super from searchspace base class
-        super().__init__()
+        super().__init__(m, n)
+
+        for i in range(m):
+            self._a.append(agtfct.create_agent('abo'))
 
         if ratio_e == None:
             print('error: ABC requires that ratio_e be set')
@@ -17,8 +21,8 @@ class abo(searchspace):
             sys.exit(1)
 
         # ABO
-        self._ratio_e = 0.0 #
-        self._step_e = 0.0 #
+        self._ratio_e = float('nan')
+        self._step_e = float('nan')
 
     def show(self):
 

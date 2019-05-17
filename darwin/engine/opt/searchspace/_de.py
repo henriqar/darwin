@@ -1,12 +1,16 @@
 
 from .searchspace import searchspace
+from darwin.engine.opt import agtfactory as agtfct
 
 class de(searchspace):
 
-    def __init__(self, mutation_factor=None, crossover_probability=None):
+    def __init__(self, m, n, mutation_factor=None, crossover_probability=None):
 
         # call super from searchspace base class
-        super().__init__()
+        super().__init__(m, n)
+
+        for i in range(m):
+            self._a.append(agtfct.create_agent('de'))
 
         if mutation_factor == None:
             print('error: DE requires that "mutation_factor" be set')
@@ -16,9 +20,8 @@ class de(searchspace):
             print('error: DE requires that "crossover_probability" be set')
             sys.exit(1)
 
-        # DE
-        self._mutation_factor = 0.0 # Mutation factor
-        self._cross_probability = 0.0
+        self._mutation_factor = float('nan')
+        self._cross_probability = float('nan')
 
     def show(self):
 

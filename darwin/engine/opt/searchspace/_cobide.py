@@ -1,23 +1,23 @@
 
+import sys
+
 from .searchspace import searchspace
-from darwin.engine.opt import agtfactory as agtfct
 
-class abc(searchspace):
+class cobide(searchspace):
 
-    def __init__(self, m, n, trial_limit=None):
+    def __init__(self, mutation_probability=None):
 
         # call super from searchspace base class
-        super().__init__(m, n)
+        super().__init__()
 
-        for i in range(m):
-            self._a.append(agtfct.create_agent('abc'))
-
-        if trial_limit == None:
-            print('error: ABC requires taht trial limit be set')
+        if mutation_probability == None:
+            print('error: GA searchspace requires a mutation probability value to work')
             sys.exit(1)
 
-        # ABC
-        self._limit = 0.0 # number of trial limits for each food source
+        # GA
+        self._pReproduction = 0.0 # probability of reproduction
+        self._pMutation = mutation_probability # probability of mutation
+        self._pCrossover = 0.0 # probability of crossover
 
     def show(self):
 
@@ -37,8 +37,9 @@ class abc(searchspace):
 
     def check(self):
 
-        if not isinstance(self._limit, float):
-            print(' -> Number of trial limits must be greater than 0')
+        if not isinstance(self._pMutation, float):
+            print(' -> Probability of mutation undefined')
             return 1
         else:
             return 0
+

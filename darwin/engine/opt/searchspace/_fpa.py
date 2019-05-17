@@ -1,12 +1,16 @@
 
 from .searchspace import searchspace
+from darwin.engine.opt import agtfactory as agtfct
 
 class fpa(searchspace):
 
-    def __init__(self, beta=None, p=None):
+    def __init__(self, m, n, beta=None, p=None):
 
         # call super from searchspace base class
-        super().__init__()
+        super().__init__(m, n)
+
+        for i in range(m):
+            self._a.append(agtfct.create_agent('fpa'))
 
         if beta == None:
             print('error: FPA requires that "beta" be set')
@@ -16,9 +20,11 @@ class fpa(searchspace):
             print('error: FPA requires that "p" be set')
             sys.exit(1)
 
-        # FPA
-        self._beta = 0.0 # used to compute the step based on Levy Flight
-        self._p = 0.0 # probability of local pollination
+        # used to compute the step based on Levy Flight
+        self._beta = float('nan')
+
+        # probability of local pollination
+        self._p = float('nan')
 
 
     def show(self):

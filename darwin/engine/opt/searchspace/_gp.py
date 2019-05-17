@@ -1,12 +1,16 @@
 
 from .searchspace import searchspace
+from darwin.engine.opt import agtfactory as agtfct
 
 class gp(searchspace):
 
-    def __init__(self, reproduction_probability=None, minimum_depth_tree=None, maximum_depth_tree=None):
+    def __init__(self, m, n, reproduction_probability=None, minimum_depth_tree=None, maximum_depth_tree=None, n_terminals=None):
 
         # call super from searchspace base class
-        super().__init__()
+        super().__init__(m, n)
+
+        for i in range(m):
+            self._a.append(agtfct.create_agent('gp'))
 
         if reproduction_probability == None:
             print('error: GP searchspace requires a "reproduction_probability" be set')
@@ -20,14 +24,20 @@ class gp(searchspace):
             print('error: GP searchspace requires a "maximum_depth_tree" be set')
             sys.exit(1)
 
-        # GP
-        self._pReproduction = 0.0 # probability of reproduction
-        self._pMutation = 0.0 # probability of mutation
-        self._pCrossover = 0.0 # probability of crossover
-        self._min_depth = 0.0 # minimum depth of a tree
-        self._max_depth = 0.0 # maximum depth of a tree
-        self_n_terminals = 0.0 # number of terminals
-        self.i_n_functions = 0.0 # number of functions
+        if n_terminals  == None:
+            print('error: GP searchspace requires a "n_terminals" be set')
+            sys.exit(1)
+
+        self._pReproduction = reproduction_probability # probability of reproduction
+        self._pMutation = float('nan') # probability of mutation
+        self._pCrossover = float('nan') # probability of crossover
+
+    # s = CreateSearchSpace(m, n, _GP_, min_depth, max_depth, n_terminals, N_CONSTANTS, n_functions, terminal, constant, function);
+
+        self._min_depth = minimum_depth_tree # minimum depth of a tree
+        self._max_depth = maximum_depth_tree # maximum depth of a tree
+        self_n_terminals = n_terminals # number of terminals
+        self._n_functions = 0.0 # number of functions
         self._n_constants = 0.0 # number of constants
         self._function = [] # matrix with the functions' names
         self._terminal = [] # matrix with the terminals' names
