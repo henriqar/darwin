@@ -49,11 +49,19 @@ class searchspace(abc.ABC):
 
         # self._tree_fit = 0.0 # fitness of each tree (in GP, the number of agents is different from the number of trees)
 
+    @property
+    def m(self):
+        return self._m
+
+    @property
+    def a(self):
+        return self._a
+
     def show(self):
         print('Search space with {} agents and {} decision variables'.format(self._m, self._n))
 
     @abc.abstractmethod
-    def evaluate(self):
+    def evaluate(self, func, args):
         pass
 
     @abc.abstractmethod

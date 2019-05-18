@@ -44,5 +44,7 @@ def getFUNCTIONid(char *s):
 def RouletteSelection(SearchSpace *s, int k):
     pass
 
-def RouletteSelectionGA(SearchSpace *s, int k):
-    pass
+# def RouletteSelectionGA(population):
+#     max = sum([c.fit for c in population.a])
+#     selection_probs = [c.fit/max for c in population.a]
+#     return population.a[np.random.choice(len(population.a), p=selection_probs)]

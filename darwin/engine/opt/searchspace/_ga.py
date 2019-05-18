@@ -2,6 +2,7 @@
 import sys
 
 from .searchspace import searchspace
+from darwin.engine.opt import agtfactory as agf
 
 class ga(searchspace):
 
@@ -13,6 +14,9 @@ class ga(searchspace):
         if mutation_probability == None:
             print('error: GA searchspace requires a mutation probability value to work')
             sys.exit(1)
+
+        for i in range(m):
+            self.a.append(agf.create_agent('ga'))
 
         # GA
         self._pReproduction = 0.0 # probability of reproduction
@@ -32,7 +36,7 @@ class ga(searchspace):
                 print(f'x[{j}]: {fit}   ', end='')
             print('fitness value: {}'.format(self._a[i].fit))
 
-    def evaluate(self):
+    def evaluate(self, func, args):
         pass
 
     def check(self):

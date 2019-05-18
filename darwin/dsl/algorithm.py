@@ -2,7 +2,8 @@
 import platform
 import sys
 
-from darwin.engine import execution as dexec
+from darwin.engine.execution.local import localfactory as lf
+from darwin.engine.execution.clustering import cluster_factory as cf
 
 from .constants import constants as cnts
 
@@ -108,16 +109,16 @@ class algorithm():
 
         # create the engine to be used in the optimization
         if self._engine == cnts.LOCAL:
-            engine = dexec.local.local(self._opt_alg, self._kwargs)
+            lf.init_factory()
+            engine = lf.create_local_execution(self._opt_alg, self._kwargs)
         elif self._engine == cnts.HTCONDOR and platform.system == 'Linux':
-            engine = dexec.clustering.clustering(self._opt_alg,self._kwargs)
+            cf.init_factory()
+            engine = cf.create_clustering_execution(self._opt_alg, self._kwargs)
 
-        # engine config
-        engine.set_nro_agents(self._nro_agents)
-        engine.set_min_function(self._func)
-        engine.set_mappings(self._parameter_map, self._parameter_sets)
-        engine.set_nro_decision_vars(self._param_id)
-        engine.execute()
+
+        # engine execution
+        engine.execute(self._nro_agents, self._param_id, self._func,
+                self._parameter_map, self._parameter_sets, self._max_itrs)
 
     # from here on we will create all methods to store specific parameters for
     # each type of optimizations

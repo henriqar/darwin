@@ -2,7 +2,7 @@
 import htcondor
 import classad
 
-class clustering:
+class clustering():
 
     def __init__(self):
 
