@@ -10,7 +10,7 @@ class fpa(searchspace):
         super().__init__(m, n)
 
         for i in range(m):
-            self._a.append(agtfct.create_agent('fpa'))
+            self._a.append(agtfct.create_agent('fpa', n))
 
         if beta == None:
             print('error: FPA requires that "beta" be set')

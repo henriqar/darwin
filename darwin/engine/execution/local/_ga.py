@@ -10,8 +10,8 @@ from darwin.engine.opt import agtfactory as agf
 from darwin.engine.opt import spfactory as spf
 
 def RouletteSelectionGA(population, k):
-    max = sum([c.fit for c in population])
-    selection_probs = [c.fit/max for c in population]
+    maximum = sum([c.fit for c in population])
+    selection_probs = [c.fit/maximum for c in population]
     return [np.random.choice(len(population), p=selection_probs, size=k)]
 
 class ga(mediator, local):

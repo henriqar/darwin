@@ -12,7 +12,7 @@ class pso(searchspace):
         super().__init__(m, n)
 
         for i in range(m):
-            self._a.append(agtfct.create_agent('pso'))
+            self._a.append(agtfct.create_agent('pso', n))
 
         if c1 == None:
             print('error: PSO searchspace requires a "c1" be set')
@@ -54,8 +54,25 @@ class pso(searchspace):
                 print(f'x[{j}]: {fit}   ', end='')
             print('fitness value: {}'.format(self._a[i].fit))
 
-    def evaluate(self):
-        pass
+    def evaluate(self, func, args):
+
+        for i in range(s.m):
+
+            fitness = s.a[i].evaluate(args)
+
+            if fitness < s.a[i].fit:
+
+                s.a[i].fit = fitness
+
+                for j in range(s.n):
+                    s.a[i].xl[j] = s.a[i].x[j]
+
+            if s.a[i].fit < s.gfit:
+
+                s.gfit = s.a[i].fit
+
+                for j in range(s.n):
+                    s.g[j] = s.a[i].x[j]
 
     def check(self):
 

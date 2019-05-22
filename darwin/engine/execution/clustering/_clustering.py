@@ -1,6 +1,9 @@
 
-import htcondor
-import classad
+import platform
+
+if platform.system == 'Linux':
+    import htcondor
+    import classad
 
 class clustering():
 

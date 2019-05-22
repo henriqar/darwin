@@ -10,7 +10,7 @@ class bso(searchspace):
         super().__init__(m, n)
 
         for i in range(m):
-            self._a.append(agtfct.create_agent('bso'))
+            self._a.append(agtfct.create_agent('bso', n))
 
         if k == None:
             print('error: BSO requires that "k" be set')

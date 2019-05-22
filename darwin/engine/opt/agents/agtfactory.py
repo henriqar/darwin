@@ -28,5 +28,5 @@ class agtfactory():
         agtfactory.agents_init['wca'] = wca
 
     @staticmethod
-    def create_agent(id):
-        return agtfactory.agents_init[id]()
+    def create_agent(id, n):
+        return agtfactory.agents_init[id](n)

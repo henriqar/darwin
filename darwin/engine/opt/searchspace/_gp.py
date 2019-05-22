@@ -10,7 +10,7 @@ class gp(searchspace):
         super().__init__(m, n)
 
         for i in range(m):
-            self._a.append(agtfct.create_agent('gp'))
+            self._a.append(agtfct.create_agent('gp', n))
 
         if reproduction_probability == None:
             print('error: GP searchspace requires a "reproduction_probability" be set')

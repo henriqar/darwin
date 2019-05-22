@@ -10,7 +10,7 @@ class wca(searchspace):
         super().__init__(m, n)
 
         for i in range(m):
-            self._a.append(agtfct.create_agent('wca'))
+            self._a.append(agtfct.create_agent('wca', n))
 
         if nsr == None:
             print('error: WCA searchspace requires a "nsr" be set')

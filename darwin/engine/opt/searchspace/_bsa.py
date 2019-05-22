@@ -10,7 +10,7 @@ class bsa(searchspace):
         super().__init__(m, n)
 
         for i in range(m):
-            self._a.append(agtfct.create_agent('bsa'))
+            self._a.append(agtfct.create_agent('bsa', n))
 
         if mix_rate == None:
             print('error: BSA requires that "mix_rate" be set')

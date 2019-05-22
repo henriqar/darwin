@@ -10,7 +10,7 @@ class cs(searchspace):
         super().__init__(m, n)
 
         for i in range(m):
-            self._a.append(agtfct.create_agent('cs'))
+            self._a.append(agtfct.create_agent('cs', n))
 
         if alpha == None:
             print('error: CS requires that "alpha" be set')

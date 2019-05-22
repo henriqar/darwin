@@ -10,7 +10,7 @@ class abo(searchspace):
         super().__init__(m, n)
 
         for i in range(m):
-            self._a.append(agtfct.create_agent('abo'))
+            self._a.append(agtfct.create_agent('abo', n))
 
         if ratio_e == None:
             print('error: ABC requires that ratio_e be set')

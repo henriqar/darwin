@@ -1,11 +1,17 @@
 
-class agent:
+import abc
 
-    def __init__(self):
+class agent(abc.ABC):
+
+    def __init__(self, n):
 
         # common definitions
-        self._n = 0 # define the number of decision variables
+        self._n = n # define the number of decision variables
+
         self._x = [] # position
+        for i in range(n):
+            self._x.append(0)
+
         self._fit = 0 # fitness value
         self._t = [] # tensor
 
@@ -64,11 +70,14 @@ class agent:
     def t_x1(self, t_x1):
         self._t_x1 = t_x1
 
+    @abc.abstractmethod
     def check_limits(self):
         pass
 
+    @abc.abstractmethod
     def copy(self):
         pass
 
-    def evaluate(self):
-        pass
+    @abc.abstractmethod
+    def evaluate(self, args):
+        return 0

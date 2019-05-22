@@ -16,7 +16,7 @@ class ga(searchspace):
             sys.exit(1)
 
         for i in range(m):
-            self.a.append(agf.create_agent('ga'))
+            self.a.append(agf.create_agent('ga', n))
 
         # GA
         self._pReproduction = 0.0 # probability of reproduction
@@ -37,7 +37,21 @@ class ga(searchspace):
             print('fitness value: {}'.format(self._a[i].fit))
 
     def evaluate(self, func, args):
-        pass
+
+        for i in range(self.m):
+
+            fitness = self.a[i].evaluate(args)
+
+            if fitness < self.a[i].fit:
+                self.a[i].fit = fitness
+
+            if self.a[i].fit < self._gfit:
+
+                self.gfit = self.a[i].fit
+
+                for j in range(self._n):
+                    self._g[j] = self.a[i].x[j]
+
 
     def check(self):
 

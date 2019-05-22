@@ -10,7 +10,7 @@ class mbo(searchspace):
         super().__init__(m, n)
 
         for i in range(m):
-            self._a.append(agtfct.create_agent('mbo'))
+            self._a.append(agtfct.create_agent('mbo', n))
 
         if k == None:
             print('error: MBO searchspace requires a "k" be set')
@@ -44,8 +44,12 @@ class mbo(searchspace):
 
             print('fitness value: {}'.format(self._a[i].fit))
 
-    def evaluate(self):
-        pass
+    def evaluate(self, func, args):
+
+        for i in range(s.m):
+
+            fitness = s.a[i].evaluate(args)
+            s.a[i].fit = fitness
 
     def check(self):
 

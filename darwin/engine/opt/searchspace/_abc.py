@@ -10,7 +10,7 @@ class abc(searchspace):
         super().__init__(m, n)
 
         for i in range(m):
-            self._a.append(agtfct.create_agent('abc'))
+            self._a.append(agtfct.create_agent('abc', n))
 
         if trial_limit == None:
             print('error: ABC requires taht trial limit be set')

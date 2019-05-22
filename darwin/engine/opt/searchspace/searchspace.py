@@ -14,9 +14,12 @@ class searchspace(abc.ABC):
         self._a = [] # array of pointers to agents
         self._LB = [] # lower boundaries of each decision variable
         self._UB = [] # upper boundaries of each decision variable
-        self._g = 0 # global best agent
         self._t_g = [] # global best tensor (matrix)
         self._best = 0 # index of the best agent
+
+        self._g = [] # global best agent
+        for i in range(n):
+            self._g.append(0)
 
         # global best fitness
         self._gfit = sys.float_info.max

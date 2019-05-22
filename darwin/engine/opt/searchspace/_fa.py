@@ -10,7 +10,7 @@ class fa(searchspace):
         super().__init__(m, n)
 
         for i in range(m):
-            self._a.append(agtfct.create_agent('fa'))
+            self._a.append(agtfct.create_agent('fa', n))
 
         if alpha == None:
             print('error: FA requires that "alpha" be set')
@@ -42,8 +42,19 @@ class fa(searchspace):
                 print(f'x[{j}]: {fit}   ', end='')
             print('fitness value: {}'.format(self._a[i].fit))
 
-    def evaluate(self):
-        pass
+    def evaluate(self, func, args):
+
+        for i in range(s.m):
+
+            fitness = s.a[i].evaluate(args)
+            s.a[i].fit = fitness
+
+            if s.a[i].fit < s.gfit:
+
+                s.gfit = s.a[i].fit
+
+                for j in range(s.n):
+                    s.g[j] = s.a[i].x[j]
 
     def check():
 

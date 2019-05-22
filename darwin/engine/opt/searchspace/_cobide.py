@@ -5,10 +5,13 @@ from .searchspace import searchspace
 
 class cobide(searchspace):
 
-    def __init__(self, mutation_probability=None):
+    def __init__(self, m, n, mutation_probability=None):
 
         # call super from searchspace base class
-        super().__init__()
+        super().__init__(m, n)
+
+        for i in range(m):
+            self._a.append(agtfct.create_agent('cobide', n))
 
         if mutation_probability == None:
             print('error: GA searchspace requires a mutation probability value to work')

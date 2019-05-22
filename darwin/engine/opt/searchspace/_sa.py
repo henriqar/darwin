@@ -10,7 +10,7 @@ class sa(searchspace):
         super().__init__(m, n)
 
         for i in range(m):
-            self._a.append(agtfct.create_agent('sa'))
+            self._a.append(agtfct.create_agent('sa', n))
 
         if initial_temperature == None:
             print('error: SA searchspace requires a "initial_temperature" be set')
@@ -24,9 +24,8 @@ class sa(searchspace):
             print('error: SA searchspace requires a "cooling_schedule" be set')
             sys.exit(1)
 
-        # SA
         self._cooling_schedule_id = cooling_schedule # identification number of the cooling schedule used on SA
-        self._init_temperature = initial_temperature # Initial temperature of the system. If it is 0 (zero) or any value below, we will determine it automatically from the number of iterations.
+        self._init_temperature = initial_temperature # Initial temp. If  0 (zero) or any below, determine it automatically from the number of iterations.
         self._end_temperature = final_temperature # temperature that means the convergence of the algorithm (Generally = 1)
         self._func_param = 0.0 # extra parameter for the cooling schedule functions
 
@@ -51,8 +50,11 @@ class sa(searchspace):
 
             print('fitness value: {}'.format(self._a[i].fit))
 
-    def evaluate(self):
-        pass
+    def evaluate(self, func, args):
+
+        for i in range(self.m):
+
+            self.a[i].evaluate(args)
 
     def check(self):
 

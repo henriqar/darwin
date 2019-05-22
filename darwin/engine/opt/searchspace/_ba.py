@@ -10,7 +10,7 @@ class ba(searchspace):
         super().__init__(m, n)
 
         for i in range(m):
-            self._a.append(agtfct.create_agent('ba'))
+            self._a.append(agtfct.create_agent('ba', n))
 
         if f_min == None:
             print('error: BA requires that "f_min" be set')

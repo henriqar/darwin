@@ -10,7 +10,7 @@ class de(searchspace):
         super().__init__(m, n)
 
         for i in range(m):
-            self._a.append(agtfct.create_agent('de'))
+            self._a.append(agtfct.create_agent('de', n))
 
         if mutation_factor == None:
             print('error: DE requires that "mutation_factor" be set')
