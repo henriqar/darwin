@@ -2,9 +2,15 @@
 import abc
 import sys
 
+from darwin.engine.opt import agtfactory as agf
+
 class searchspace(abc.ABC):
 
-    def __init__(self, m, n):
+    def __init__(self, name, m, n, engine, maps):
+
+        if not isinstance(name, str):
+            print('searchspace given name not a string')
+            sys.exit(1)
 
         # common definitions
         self._m = m # number of agents (solutions)
@@ -12,8 +18,15 @@ class searchspace(abc.ABC):
         self._iterations = 0 # number of iterations for convergence
 
         self._a = [] # array of pointers to agents
-        self._LB = [] # lower boundaries of each decision variable
-        self._UB = [] # upper boundaries of each decision variable
+        for i in range(m):
+            self.a.append(agf.create_agent(name, n, engine))
+
+            for j in range(n):
+                _,v = maps[j]
+                self.a[i].x[j] = v.uniform_random_element()
+
+        # self._LB = [] # lower boundaries of each decision variable
+        # self._UB = [] # upper boundaries of each decision variable
         self._t_g = [] # global best tensor (matrix)
         self._best = 0 # index of the best agent
 
@@ -64,8 +77,8 @@ class searchspace(abc.ABC):
         print('Search space with {} agents and {} decision variables'.format(self._m, self._n))
 
     @abc.abstractmethod
-    def evaluate(self, func, args):
-        pass
+    def evaluate(self, func, maps):
+        return sys.max_int
 
     @abc.abstractmethod
     def check(self):

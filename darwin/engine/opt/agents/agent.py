@@ -1,18 +1,22 @@
 
 import abc
+import sys
 
 class agent(abc.ABC):
 
-    def __init__(self, n):
+    def __init__(self, n, engine):
 
         # common definitions
         self._n = n # define the number of decision variables
+
+        # save the engine used
+        self._engine = engine
 
         self._x = [] # position
         for i in range(n):
             self._x.append(0)
 
-        self._fit = 0 # fitness value
+        self._fit = sys.maxsize # fitness value
         self._t = [] # tensor
 
         # AIWPSO
@@ -78,6 +82,15 @@ class agent(abc.ABC):
     def copy(self):
         pass
 
-    @abc.abstractmethod
-    def evaluate(self, args):
-        return 0
+    def evaluate(self, func, maps):
+
+        args = {}
+        for i in range(self._n):
+            k, v = maps[i]
+            args[k] = v[self._x[i]]
+
+        val = self._engine.exec(func, args)
+        if not isinstance(val, int) and not isinstance(val, float):
+            raise TypeError('expected <int> or <float>, got {} for min '
+                'function return'.format(type(val)))
+        return val

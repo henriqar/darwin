@@ -8,3 +8,6 @@ class ga(agent):
 
     def copy(self):
         pass
+
+    def evaluate(self, args):
+        return 1

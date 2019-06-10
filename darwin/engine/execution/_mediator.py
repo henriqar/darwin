@@ -9,7 +9,7 @@ class mediator(abc.ABC):
         self._kwargs = kwargs
 
     @abc.abstractmethod
-    def execute(self, m, n, func, names, sets, max_itr):
+    def execute(self, m, n, func, maps, max_itr):
         pass
 
 

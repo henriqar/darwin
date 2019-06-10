@@ -1,22 +1,34 @@
 
+import logging
 import platform
 import sys
 
-from darwin.engine.execution.local import localfactory as lf
-from darwin.engine.execution.clustering import cluster_factory as cf
+# from darwin.engine.execution.local import localfactory as lf
+# from darwin.engine.execution.clustering import clusterfactory as cf
+from darwin.engine.execution.engine_factory import enginefactory as fct
+
+from darwin.engine.execution.jobs import clustering
+from darwin.engine.execution.jobs import local
 
 from .constants import constants as cnts
+from .map import Map
 
 class algorithm():
 
     def __init__(self, opt_alg):
 
+
+        # create the logging instance
+        logging.basicConfig(level=logging.DEBUG)
+        logging.debug("starting logging engine")
+
         # create the dictionary to hold all sets
         # each set will be indexed by and id, created using the name of the
         # parameter. The parameters will be automatically mapped to a discrete
         # integer value on the parameter_map
-        self._parameter_sets = {}
-        self._parameter_map = {}
+        # self._parameter_sets = {}
+        # self._parameter_map = {}
+        self._maps = {}
 
         # define the auto incremented parameter id
         self._param_id = 0
@@ -49,21 +61,26 @@ class algorithm():
         # create the dictionary to call the fectories with kwargs
         self._kwargs = {}
 
+        fct.init_factory()
+
     def __repr__(self):
-        return "darwin.algorithm(opt={}, param={}, exc_groups={})".format(
-                self._algorithms, self._parameter_sets, self._exclusive_groups)
+        return "darwin.algorithm(opt={}, maps={}, exc_groups={})".format(
+                self._algorithms, self._maps, self._exclusive_groups)
 
     def add_parameter(self, name=None, param=None, discrete=False):
 
         if name is None or name == '':
-            raise TypeError(f"parameter name must be defined, got '{name}'")
+            raise TypeError("parameter name must be defined, got '{}'".format(name))
 
         if isinstance(param, tuple):
             # force mapparam to be tuple, not modifyable
-            self._parameter_map[name] = self._param_id
-            self._parameter_sets[self._param_id] = param
+            # self._parameter_map[name] = self._param_id
+            # self._parameter_sets[self._param_id] = Map(param)
+
+            self._maps[self._param_id] = (name, Map(param))
+
             self._param_id += 1
-            return self._parameter_map[name]
+            return self._param_id - 1
         else:
             raise TypeError("error: map parameter must be a tuple type")
 
@@ -73,9 +90,13 @@ class algorithm():
 
             # verify if id of grouo matches the tuple expected
             if not isinstance(group, tuple):
-                raise TypeError(f'group descriptor "{group}" not recognized')
+                raise TypeError('group descriptor "{}" not recognized'.format(group))
             else:
                 self._exclusive_groups.append(group)
+
+    def set_collector(self, collector):
+
+        self._coll = collector
 
     def set_function(self, func):
 
@@ -99,8 +120,8 @@ class algorithm():
 
     def start(self):
 
-        if not self._parameter_sets:
-            print('error: no parameter set specified')
+        if not self._maps:
+            print('error: no map specified')
             sys.exit(1)
 
         if self._func is None:
@@ -109,16 +130,16 @@ class algorithm():
 
         # create the engine to be used in the optimization
         if self._engine == cnts.LOCAL:
-            lf.init_factory()
-            engine = lf.create_local_execution(self._opt_alg, self._kwargs)
-        elif self._engine == cnts.HTCONDOR and platform.system == 'Linux':
-            cf.init_factory()
-            engine = cf.create_clustering_execution(self._opt_alg, self._kwargs)
+            engine = local()
+        elif self._engine == cnts.HTCONDOR and platform.system() == 'Linux':
+            engine = clustering()
 
+        # create optimization algorithm execution
+        optimization = fct.create_engine(self._opt_alg, self._kwargs)
 
         # engine execution
-        engine.execute(self._nro_agents, self._param_id, self._func,
-                self._parameter_map, self._parameter_sets, self._max_itrs)
+        optimization.execute(self._nro_agents, self._param_id, engine, self._func,
+                self._maps, self._max_itrs)
 
     # from here on we will create all methods to store specific parameters for
     # each type of optimizations
@@ -306,7 +327,7 @@ class algorithm():
         if val in ('boltzmann_annealing',):
             self._kwargs['cooling_schedule'] = val
         else:
-            print(f'error: cooling schedule not recognized "{val}"')
+            print('error: cooling schedule not recognized "{}"'.format(val))
             sys.exit(1)
 
     # WCA specific information ------------------------------------------------

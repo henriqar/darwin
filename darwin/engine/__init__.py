@@ -1,8 +1,8 @@
 
 import platform
 
-from .execution.local import local
+from .execution.jobs import local
 
 if platform.system == 'Linux':
-    from .execution.clustering import clustering
+    from .execution.jobs import clustering
 

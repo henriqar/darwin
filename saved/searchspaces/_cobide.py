@@ -1,21 +1,20 @@
 
-import logging
 import sys
 
 from .searchspace import searchspace
 
-class ga(searchspace):
+class cobide(searchspace):
 
-    def __init__(self, m, n, engine, maps, mutation_probability=None):
+    def __init__(self, m, n, mutation_probability=None):
 
         # call super from searchspace base class
-        super().__init__('ga', m, n, engine, maps)
+        super().__init__(m, n)
+
+        for i in range(m):
+            self._a.append(agtfct.create_agent('cobide', n))
 
         if mutation_probability == None:
-            logging.error('error: GA searchspace requires a mutation probability value\
-                    to work')
-            # print('error: GA searchspace requires a mutation probability value\
-                    # to work')
+            print('error: GA searchspace requires a mutation probability value to work')
             sys.exit(1)
 
         # GA
@@ -36,23 +35,8 @@ class ga(searchspace):
                 print('x[{}]: {}   '.format(j, fit), end='')
             print('fitness value: {}'.format(self._a[i].fit))
 
-    def evaluate(self, func, maps):
-
-        for i in range(self.m):
-
-            fitness = self.a[i].evaluate(func, maps)
-            # fitness = self.a[i].evaluate(func, args)
-
-            if fitness < self.a[i].fit:
-                self.a[i].fit = fitness
-
-            if self.a[i].fit < self._gfit:
-
-                self.gfit = self.a[i].fit
-
-                for j in range(self._n):
-                    self._g[j] = self.a[i].x[j]
-
+    def evaluate(self):
+        pass
 
     def check(self):
 

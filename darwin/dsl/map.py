@@ -1,58 +1,103 @@
 
+import itertools
+import copy
 
-from type import MappingProxyType
+import numpy as np
 
-class Map(MappingProxyType):
+class Map(tuple):
 
-    def __init__(self, data):
-
+    def __new__(self, data):
         try:
-            iterator = iter(data)
-        except TypeError:
-            pass
+            it = iter(data)
+        except TypeError :
+            raise
         else:
-            pass
+            return tuple.__new__(Map, data)
 
-    def generate_uniform_random_number(self):
-        pass
+    @property
+    def lb(self):
+        return 0
 
-    def generate_gaussian_random_number(self):
-        pass
+    @property
+    def ub(self):
+        return len(self)-1
 
-    def generate_cauchy_random_number(self):
-        pass
+    def uniform_random_element(self, discrete=True):
+        if discrete:
+            return np.random.randint(0, len(self))
+        else:
+            return np.random.uniform(0, len(self))
 
-    def generate_levy_distribution(self):
-        pass
+    def gaussian_random_element(self):
+        return np.random.normal(0, len(self))
 
-    def euclidean_distance(self):
-        pass
+    def cauchy_random_element(self):
+        return np.random.standard_cauchy(0, len(self))
 
-    def get_perpendicular_vector(self):
-        pass
+    # def generate_levy_distribution(self):
+    #     pass
 
-    def normalize_vector(self):
-        pass
+    # def euclidean_distance(self):
+    #     pass
 
-    def sort_agent(self):
-        pass
+    # def get_perpendicular_vector(self):
+    #     pass
 
-    def sort_data_by_val(self):
-        pass
+    # def normalize_vector(self):
+    #     pass
 
-    def waive_comment(self):
-        pass
+    # def sort_agent(self):
+    #     pass
 
-    def read_searchspace_from_file(self):
-        pass
+    # def sort_data_by_val(self):
+    #     pass
 
-    def get_FUNCTION_id(self):
-        pass
+    # def waive_comment(self):
+    #     pass
 
-    def roulette_selection(self):
-        pass
+    # def get_FUNCTION_id(self):
+    #     pass
 
-    def roultte_selection_ga(self):
-        pass
+    # def roulette_selection(self):
+    #     pass
+
+    # def roultte_selection_ga(self):
+    #     pass
+
+    # def __add__(self, other):
+    #     return Map(tuple(self.iterable) + tuple(other.iterable))
+
+    # def __iadd__(self, other):
+    #     return Map(self.iterable + (other,))
+
+    # def __radd__(self, other):
+    #     return Map(other.iterable + self.iterable)
+
+    # def __sub__(self, other):
+    #     pass
+
+    # def __isub__(self, other):
+    #     pass
+
+    # def __rsub__(self, other):
+    #     pass
+
+    # def __mul__(self, other):
+    #     return Map(tuple(itertools.product(self.iterable, other.iterable)))
+
+    # def __imul__(self, other):
+    #     return Map(tuple(itertools.product(self.iterable, (other,))))
+
+    # def __rmul__(self, other):
+    #     return Map(tuple(itertools.product(other.iterable, self.iterable)))
+
+    # def __div__(self, other):
+    #     pass
+
+    # def __idiv__(self, other):
+    #     pass
+
+    # def __rdiv__(self, other):
+    #     pass
 
 
