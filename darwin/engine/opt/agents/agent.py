@@ -4,10 +4,11 @@ import sys
 
 class agent(abc.ABC):
 
-    def __init__(self, n, engine):
+    def __init__(self, dmap, engine):
 
         # common definitions
-        self._n = n # define the number of decision variables
+        self._n = dmap['n'] # define the number of decision variables
+        self._maps = dmap['maps']
 
         # save the engine used
         self._engine = engine
@@ -82,14 +83,15 @@ class agent(abc.ABC):
     def copy(self):
         pass
 
-    def evaluate(self, func, maps):
+    # def evaluate(self, func, maps):
+    def evaluate(self):
 
         args = {}
         for i in range(self._n):
-            k, v = maps[i]
+            k, v = self._maps[i]
             args[k] = v[self._x[i]]
 
-        val = self._engine.exec(func, args)
+        val = self._engine.exec(args)
         if not isinstance(val, int) and not isinstance(val, float):
             raise TypeError('expected <int> or <float>, got {} for min '
                 'function return'.format(type(val)))

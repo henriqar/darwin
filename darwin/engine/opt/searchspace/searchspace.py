@@ -6,22 +6,23 @@ from darwin.engine.opt import agtfactory as agf
 
 class searchspace(abc.ABC):
 
-    def __init__(self, name, m, n, engine, maps):
+    # def __init__(self, name, m, n, engine, maps):
+    def __init__(self, name, dmap, engine):
 
         if not isinstance(name, str):
             print('searchspace given name not a string')
             sys.exit(1)
 
         # common definitions
-        self._m = m # number of agents (solutions)
-        self._n = n # number of decision variables
+        self._m = dmap['m'] # number of agents (solutions)
+        self._n = dmap['n'] # number of decision variables
         self._iterations = 0 # number of iterations for convergence
 
         self._a = [] # array of pointers to agents
-        for i in range(m):
-            self.a.append(agf.create_agent(name, n, engine))
+        for i in range(self._m):
+            self.a.append(agf.create_agent(name, self._n, engine))
 
-            for j in range(n):
+            for j in range(self._n):
                 _,v = maps[j]
                 self.a[i].x[j] = v.uniform_random_element()
 
@@ -31,7 +32,7 @@ class searchspace(abc.ABC):
         self._best = 0 # index of the best agent
 
         self._g = [] # global best agent
-        for i in range(n):
+        for i in range(self._n):
             self._g.append(0)
 
         # global best fitness
@@ -74,11 +75,13 @@ class searchspace(abc.ABC):
         return self._a
 
     def show(self):
-        print('Search space with {} agents and {} decision variables'.format(self._m, self._n))
+        print('Search space with {} agents and {} decision variables'\
+                .format(self._m, self._n))
 
     @abc.abstractmethod
-    def evaluate(self, func, maps):
-        return sys.max_int
+    # def evaluate(self, func, maps):
+    def evaluate(self):
+        raise NotImplementedError()
 
     @abc.abstractmethod
     def check(self):

@@ -5,9 +5,6 @@ import math
 import numpy as np
 
 from darwin.engine.execution._mediator import mediator
-# from darwin.engine.execution.local import local
-
-# from darwin.engine.opt import agtfactory as agf
 from darwin.engine.opt import spfactory as spf
 
 def RouletteSelectionGA(population, k):
@@ -17,18 +14,25 @@ def RouletteSelectionGA(population, k):
 
 class ga(mediator):
 
-    def execute(self, m, n, engine, func, maps, max_itr):
+    # def execute(self, m, n, engine, func, maps, max_itr):
+    def execute(self, engine):
+
+        # extract darwin parametrs from dict
+        m = self._dmap['m']
+        n = self._dmap['n']
+        maps = self._dmap['maps']
+        max_itrs = self._dmap['max_itrs']
 
         # create both factories for agents and searchspace
         # agf.init_factory()
         spf.init_factory()
 
         # get the searchspace used
-        searchspace = spf.create_searchspace('ga', m, n, engine, maps, self._kwargs)
+        # searchspace = spf.create_searchspace('ga', m, n, engine, maps, self._kwargs)
+        searchspace = spf.create_searchspace('ga', self._dmap, engine, self._kwargs)
 
-        args = {}
 	# EvaluateSearchSpace(s, _GA_, Evaluate, arg); Initial evaluation of the search space */
-        searchspace.evaluate(func, maps)
+        searchspace.evaluate()
 
         tmp = [[0 for j in range(n)] for i in range(m)]
 
@@ -80,7 +84,11 @@ class ga(mediator):
                     for k in range(n):
                         searchspace.a[j].x[k] = tmp[j][k]
 
-                searchspace.evaluate(func, maps)
+                # searchspace.evaluate(func, maps)
+                searchspace.evaluate()
+
+                # create a generator using yield
+                yield
 
         print('OK (minimum fitness value {})'.format(searchspace.gfit))
 

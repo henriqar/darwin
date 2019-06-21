@@ -12,10 +12,8 @@ class ga(searchspace):
         super().__init__('ga', m, n, engine, maps)
 
         if mutation_probability == None:
-            logging.error('error: GA searchspace requires a mutation probability value\
-                    to work')
-            # print('error: GA searchspace requires a mutation probability value\
-                    # to work')
+            logging.error('error: GA searchspace requires a mutation\
+                    probability value to work')
             sys.exit(1)
 
         # GA
@@ -41,7 +39,6 @@ class ga(searchspace):
         for i in range(self.m):
 
             fitness = self.a[i].evaluate(func, maps)
-            # fitness = self.a[i].evaluate(func, args)
 
             if fitness < self.a[i].fit:
                 self.a[i].fit = fitness

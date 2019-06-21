@@ -1,5 +1,11 @@
 
+import functools
+
+import numpy as np
+
 from ._node import node
+
+from types import MappingProxyType
 
 class paramspace:
 
@@ -17,8 +23,11 @@ class paramspace:
         # create the list of exclusive groups
         self._exclusive_groups = []
 
-        # save the tree root node
+        # save the tree root node and the reference to the complete param set
         self._tree_root = None
+        self._pt = None
+        self._wt = None
+        self._wp = None
 
     def __item__(self, idx):
         return self._params[idx]
@@ -55,17 +64,14 @@ class paramspace:
         for ex in self._exclusive_groups:
 
             nodes = [self._tree_root]
-
             while nodes:
 
                 tnode = nodes.pop()
-
                 if ex.issubset(tnode.p):
 
                     if tnode.size > 0:
                         for child in reversed(range(tnode.size)):
                             nodes.append(tnode[child])
-
                     else:
                         for param in tuple(ex):
                             tnode.add_child(node(tnode.p.difference((param,))))
@@ -74,6 +80,7 @@ class paramspace:
         # calculate the weights for each branch
         nodes = [self._tree_root]
 
+        leafs = []
         while nodes:
 
             tnode = nodes.pop()
@@ -81,12 +88,21 @@ class paramspace:
             w = 1
             for pi in tuple(tnode.p):
                 w *= self._param_weight(pi)
-
             tnode.w = w
 
             if tnode.size > 0:
                 for child in reversed(range(tnode.size)):
                     nodes.append(tnode[child])
+            else:
+                leafs.append(tnode)
+
+        # create a node correspondin to the space
+        self._wt = tuple(map(lambda i: i.w, leafs))
+        self._pt = tuple(map(lambda i: tuple(i.p), leafs))
+
+        # set the percentage of each set
+        sumw = sum(self._wt)
+        self._wp = tuple(map(lambda i: i/sumw, self._wt))
 
     def _param_weight(self, idx):
         if idx in self._params:
@@ -95,7 +111,7 @@ class paramspace:
         return 0
 
 
-    def __repr__(self):
+    def __str__(self):
 
         string = []
         nodes = [self._tree_root]
@@ -111,8 +127,6 @@ class paramspace:
 
             lprefix = prefix.pop()
             lcprefix = cprefix.pop()
-            # print(lcprefix, end='')
-            # print(tnode.p)
             string.append(lcprefix)
             string.extend([str(tnode.p), '\n'])
 
@@ -137,3 +151,36 @@ class paramspace:
 
         return ''.join(string)
 
+    def random_uniform(self):
+
+        # create dict to hold parameters
+        pdict = {}
+
+        # choose one of the possibilities
+        choosen = np.random.choice(self._pt, p=self._wp)
+
+        # get item and randomize arguments inside
+        for param in choosen:
+            name, tup = self._params[param]
+            pdict[name] =  np.random.choice(tup)
+
+        # return read-only dict for user
+        return MappingProxyType(pdict)
+
+    def random_gaussian(self):
+
+        # create dict to hold parameters
+        pdict = {}
+
+
+        # return read-only dict for user
+        return MappingProxyType(pdict)
+
+    def random_cauchy(self):
+
+        # create dict to hold parameters
+        pdict = {}
+
+
+        # return read-only dict for user
+        return MappingProxyType(pdict)

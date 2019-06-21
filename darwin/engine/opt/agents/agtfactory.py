@@ -28,5 +28,5 @@ class agtfactory():
         # agtfactory.agents_init['wca'] = wca
 
     @staticmethod
-    def create_agent(id, n, engine):
-        return agtfactory.agents_init[id](n, engine)
+    def create_agent(id, dmap, engine):
+        return agtfactory.agents_init[id](dmap, engine)

@@ -22,16 +22,18 @@ class algorithm():
         logging.basicConfig(level=logging.DEBUG)
         logging.debug("starting logging engine")
 
+        # create aa dictionary to hold all darwin related parameters
+        self._dmap ={}
+
         # create the dictionary to hold all sets
         # each set will be indexed by and id, created using the name of the
         # parameter. The parameters will be automatically mapped to a discrete
         # integer value on the parameter_map
-        # self._parameter_sets = {}
-        # self._parameter_map = {}
         self._maps = {}
 
         # define the auto incremented parameter id
-        self._param_id = 0
+        # self._param_id = 0
+        self._dmap['n'] = 0
 
         # create the list of exclusive groups
         self._exclusive_groups = []
@@ -52,12 +54,6 @@ class algorithm():
         # define the varibale to hold the function to be minimized
         self._func = None
 
-        # define the number of agents
-        self._nro_agents = 0
-
-        #init max iterations
-        self._max_itrs = 0
-
         # create the dictionary to call the fectories with kwargs
         self._kwargs = {}
 
@@ -74,13 +70,10 @@ class algorithm():
 
         if isinstance(param, tuple):
             # force mapparam to be tuple, not modifyable
-            # self._parameter_map[name] = self._param_id
-            # self._parameter_sets[self._param_id] = Map(param)
+            self._maps[self._dmap['n']] = (name, Map(param))
 
-            self._maps[self._param_id] = (name, Map(param))
-
-            self._param_id += 1
-            return self._param_id - 1
+            self._dmap['n'] += 1
+            return self._dmap['n'] - 1
         else:
             raise TypeError("error: map parameter must be a tuple type")
 
@@ -94,10 +87,6 @@ class algorithm():
             else:
                 self._exclusive_groups.append(group)
 
-    def set_collector(self, collector):
-
-        self._coll = collector
-
     def set_function(self, func):
 
         # save the function to be minimized
@@ -110,13 +99,13 @@ class algorithm():
 
     def set_agents(self, nro_agents):
 
-        # define how many agnets to be used
-        self._nro_agents = int(nro_agents)
+        # define how many agents to be used
+        self._dmap['m'] = int(nro_agents)
 
     def set_max_iterations(self, max_itrs):
 
         # set max iterations (guarantee no funny stuff here)
-        self._max_itrs = int(max_itrs)
+        self._dmap['max_itrs'] = int(max_itrs)
 
     def start(self):
 
@@ -130,16 +119,18 @@ class algorithm():
 
         # create the engine to be used in the optimization
         if self._engine == cnts.LOCAL:
-            engine = local()
+            engine = local(self._func)
         elif self._engine == cnts.HTCONDOR and platform.system() == 'Linux':
-            engine = clustering()
+            engine = clustering(self._func)
+
+        #save all needed data in dmap
+        self._dmap['maps'] = self._maps
 
         # create optimization algorithm execution
-        optimization = fct.create_engine(self._opt_alg, self._kwargs)
+        opt = fct.create_engine(self._opt_alg, self._dmap, self._kwargs)
 
         # engine execution
-        optimization.execute(self._nro_agents, self._param_id, engine, self._func,
-                self._maps, self._max_itrs)
+        opt.execute(engine)
 
     # from here on we will create all methods to store specific parameters for
     # each type of optimizations

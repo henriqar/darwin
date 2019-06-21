@@ -37,3 +37,6 @@ class node:
 
     def __setitem__(self, idx, val):
         self._childs[idx] = val
+
+    def __str__(self):
+        return 'Node(set: {}, weight: {})'.format(self.p, self.w)

@@ -29,5 +29,5 @@ class enginefactory():
         # enginefactory.engine_init['wca'] = wca
 
     @staticmethod
-    def create_engine(id, kwarg_dict):
-        return enginefactory.engine_init[id](kwarg_dict)
+    def create_engine(id, dw_params, kwarg_dict):
+        return enginefactory.engine_init[id](dw_params, kwarg_dict)

@@ -2,11 +2,6 @@
 
 from setuptools import setup, find_packages, Extension
 
-opt_extension = Extension(
-    name='_opt',
-    sources=['darwin/_opt.c']
-)
-
 setup(
     name="darwin",
     version="0.0.0",
@@ -21,5 +16,4 @@ setup(
         "Development Status :: 1 - Planning",
         "License :: OSI Approved :: MIT License"
     ],
-    ext_modules=[opt_extension]
 )
