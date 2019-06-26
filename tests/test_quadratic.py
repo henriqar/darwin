@@ -16,12 +16,12 @@ map2 = ('a', 'b', 'c', 'd')
 opt.add_parameter(name='map1', param=map1)
 opt.add_parameter(name='map2', param=map2)
 
-opt.set_function(Quadratic)
-opt.set_agents(10)
-opt.set_max_iterations(10)
+opt.function = Quadratic
+opt.agents = 10
+opt.iterations = 10
 
 # exclusive GA parameters
-opt.set_mutation_probability(0.2)
+opt.mutation_probability = 0.2
 
 opt.start()
 

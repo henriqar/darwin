@@ -12,7 +12,7 @@ file_handler.setLevel(logging.INFO)
 
 # create formatters
 cmd_format = logging.Formatter('%(name)s - %(levelname)s - %(message)s')
-fileformat = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+file_format = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 cmd_handler.setFormatter(cmd_format)
 file_handler.setFormatter(file_format)
 

@@ -1,2 +1,2 @@
 
-from dlogger import dlogger
+from .dlogger import dlogger

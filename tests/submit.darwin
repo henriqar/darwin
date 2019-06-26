@@ -1,0 +1,10 @@
+
+###########################
+# Submit description file
+###########################
+
+executable    = sleep.sh
+universe      = vanilla  
+output        = darwin.out
+log           = darwin.log
+queue

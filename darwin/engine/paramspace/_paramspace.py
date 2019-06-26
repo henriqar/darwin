@@ -7,11 +7,23 @@ from ._node import node
 
 from types import MappingProxyType
 
+from darwin.engine.opt import spfactory
+
 class paramspace:
+
+    # create the singleton pattern
+    __instance = None
+
+    def __new__(cls):
+        if paramspace.__instance is None:
+            paramspace.__instance = super().__new__(cls)
+        return paramspace.__instance
 
     def __init__(self):
 
-        # create the dictionary to hold all sets
+        # searchspaces variables
+        self._n = 0
+
         # each set will be indexed by and id, created using the name of the
         # parameter. The parameters will be automatically mapped to a discrete
         # integer value on the parameter_map
@@ -31,6 +43,17 @@ class paramspace:
 
     def __item__(self, idx):
         return self._params[idx]
+
+    def __len__(self):
+        return self._param_id
+
+    @property
+    def n(self):
+        return self._param_id
+
+    @property
+    def combinations(self):
+        return sum(self._wt)
 
     def add_param(self, name=None, param=None, discrete=False):
 
@@ -103,6 +126,23 @@ class paramspace:
         # set the percentage of each set
         sumw = sum(self._wt)
         self._wp = tuple(map(lambda i: i/sumw, self._wt))
+
+    def create_searchspaces(self, opt_alg)
+
+        # initialize the searchspac factory
+        spfactory.init_factory()
+
+        # create a list of searchspaces basd on the parameters found
+        searchspaces = []
+        for params in self._pt:
+
+            # searchspace aux
+            spaux = spfactory.create_searchspace(opt_alg, engine, self._kwargs)
+            spaux.n = params
+
+            searchspaces.append(spaux)
+
+        return searchspaces
 
     def _param_weight(self, idx):
         if idx in self._params:

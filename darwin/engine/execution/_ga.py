@@ -4,37 +4,59 @@ import math
 
 import numpy as np
 
-from darwin.engine.execution._mediator import mediator
-from darwin.engine.opt import spfactory as spf
+from darwin.engine.paramspace import paramspace
+from darwin.engine.execution.strategy import strategy
+# from darwin.engine.opt import spfactory as spf
 
 def RouletteSelectionGA(population, k):
     maximum = sum([c.fit for c in population])
     selection_probs = [c.fit/maximum for c in population]
     return np.random.choice(len(population), p=selection_probs, size=k)
 
-class ga(mediator):
+class ga(strategy):
 
-    # def execute(self, m, n, engine, func, maps, max_itr):
-    def execute(self, engine):
+    def initializer(self, searchspace):
 
         # extract darwin parametrs from dict
-        m = self._dmap['m']
-        n = self._dmap['n']
-        maps = self._dmap['maps']
+        m = searchspace.m
+        n = searchspace.n
+        # max_itrs = self._dmap['max_itrs']
+
+        # create both factories for agents and searchspace
+        # agf.init_factory()
+        # spf.init_factory()
+
+        # get the searchspace used
+        # searchspace = spf.create_searchspace('ga', m, n, engine, maps, self._kwargs)
+        # searchspace = spf.create_searchspace('ga', self._dmap, engine, self._kwargs)
+
+	# EvaluateSearchSpace(s, _GA_, Evaluate, arg); Initial evaluation of the search space */
+        searchspace.schedule()
+
+    # def execute(self, m, n, engine, func, maps, max_itr):
+    def execute_step(self, searchspace, engine):
+
+        # get the pmappings through the sungleton paramsapce
+        maps = paramspace()
+
+        # extract darwin parametrs from dict
+        m = searchspace.m
+        n = searchspace.n
         max_itrs = self._dmap['max_itrs']
 
         # create both factories for agents and searchspace
         # agf.init_factory()
-        spf.init_factory()
+        # spf.init_factory()
 
         # get the searchspace used
         # searchspace = spf.create_searchspace('ga', m, n, engine, maps, self._kwargs)
-        searchspace = spf.create_searchspace('ga', self._dmap, engine, self._kwargs)
+        # searchspace = spf.create_searchspace('ga', self._dmap, engine, self._kwargs)
 
 	# EvaluateSearchSpace(s, _GA_, Evaluate, arg); Initial evaluation of the search space */
-        searchspace.evaluate()
+        # searchspace.schedule()
 
-        tmp = [[0 for j in range(n)] for i in range(m)]
+        tmp = [ dict.fromkeys(n, 0) for i in range(m)]
+        # tmp = [[0 for j in range(n)] for i in range(m)]
 
         for t in range(max_itr):
 
@@ -50,7 +72,8 @@ class ga(mediator):
                 for p in range(0, math.floor(m/2), 2):
 
                     crossover_index = np.random.uniform(0, m)
-                    for k in range(n):
+                    for k in n:
+                    # for k in range(n):
 
                         if k < crossover_index:
                             tmp[p][k] = searchspace.a[selection[p]].x[k]
@@ -61,11 +84,15 @@ class ga(mediator):
 
                 if m % 2 == 0:
 
-                    crossover_index = np.random.uniform(0, n)
+                    # crossover_index = np.random.uniform(0, n)
+                    crossover_index = np.random.uniform(0, len(n))
 
-                    for k in range(n):
+                    # for k in n:
+                    for idx, k in enumerate(n):
+                    # for k in range(n):
 
-                        if k < crossover_index:
+                        # if k < crossover_index:
+                        if idx < crossover_index:
                             tmp[m-1][k] = searchspace.a[selection[m-1]].x[k]
                         else:
                             tmp[m-1][k] = searchspace.a[selection[0]].x[k]
@@ -81,11 +108,12 @@ class ga(mediator):
 
                 # changes the generation
                 for j in range(m):
-                    for k in range(n):
+                    for k in n:
+                    # for k in range(n):
                         searchspace.a[j].x[k] = tmp[j][k]
 
-                # searchspace.evaluate(func, maps)
-                searchspace.evaluate()
+                # searchspace.schedule(func, maps)
+                searchspace.schedule()
 
                 # create a generator using yield
                 yield

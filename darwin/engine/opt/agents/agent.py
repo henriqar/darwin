@@ -4,18 +4,24 @@ import sys
 
 class agent(abc.ABC):
 
-    def __init__(self, dmap, engine):
+    def __init__(self, n, engine):
+
+        if not isinstance(n, tuple):
+            __log.error('agent must receive an iterable with the params used')
 
         # common definitions
-        self._n = dmap['n'] # define the number of decision variables
-        self._maps = dmap['maps']
+        self._n = n
+
+        # set the intermediate result for each simulation
+        self._intermediate = sys.maxsize
 
         # save the engine used
         self._engine = engine
 
         self._x = [] # position
-        for i in range(n):
-            self._x.append(0)
+        # for i in range(n):
+        #     self._x.append(0)
+        self._x = dict.fromkeys(n, None)
 
         self._fit = sys.maxsize # fitness value
         self._t = [] # tensor
@@ -26,6 +32,17 @@ class agent(abc.ABC):
         # TensorPSO
         self._t_v = [] # tensor velocity (matrix)
         self._t_xl = [] # tensor local best (matrix)
+
+    @property
+    def intermediate(self):
+        return self._intermediate
+
+    @intermediate.setter
+    def intermediate(self, val):
+        if not isinstance(val, int) and not isinstance(val, float):
+            raise TypeError('expected <int> or <float>, got {} for min '
+                'function return'.format(type(val)))
+        self._intermediate = val
 
     @property
     def n(self):
@@ -84,15 +101,15 @@ class agent(abc.ABC):
         pass
 
     # def evaluate(self, func, maps):
-    def evaluate(self):
+    def schedule(self):
+
+        # set the intermediate before executing
+        self._intermediate = sys.maxsize
 
         args = {}
-        for i in range(self._n):
+        for i in self._n:
+        # for i in range(self._n):
             k, v = self._maps[i]
             args[k] = v[self._x[i]]
 
-        val = self._engine.exec(args)
-        if not isinstance(val, int) and not isinstance(val, float):
-            raise TypeError('expected <int> or <float>, got {} for min '
-                'function return'.format(type(val)))
-        return val
+        self._executor.register_job((self, args))

@@ -4,15 +4,17 @@ import sys
 
 from .searchspace import searchspace
 
+__log = logging.getLogger('darwin')
+
 class ga(searchspace):
 
-    def __init__(self, m, n, engine, maps, mutation_probability=None):
+    def __init__(self, engine, mutation_probability=None):
 
         # call super from searchspace base class
-        super().__init__('ga', m, n, engine, maps)
+        super().__init__('ga', engine)
 
         if mutation_probability == None:
-            logging.error('error: GA searchspace requires a mutation\
+            __log.error('error: GA searchspace requires a mutation\
                     probability value to work')
             sys.exit(1)
 
@@ -24,7 +26,7 @@ class ga(searchspace):
     def show(self):
 
         # call super to show basic data
-        super.show()
+        super().show()
 
         for i in range(self._m):
 
@@ -34,11 +36,18 @@ class ga(searchspace):
                 print('x[{}]: {}   '.format(j, fit), end='')
             print('fitness value: {}'.format(self._a[i].fit))
 
-    def evaluate(self, func, maps):
+    def schedule(self):
+
+        # send evaluations to execution engine
+        for i in range(self.m):
+            self.a[i].schedule()
+
+    def update(self):
 
         for i in range(self.m):
 
-            fitness = self.a[i].evaluate(func, maps)
+            # get the intermediate value of the simulation
+            fitness = self.a[i].intermediate
 
             if fitness < self.a[i].fit:
                 self.a[i].fit = fitness

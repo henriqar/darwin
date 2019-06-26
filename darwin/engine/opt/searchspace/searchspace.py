@@ -1,30 +1,40 @@
 
+import logging
+
 import abc
 import sys
 
-from darwin.engine.opt import agtfactory as agf
+from darwin.engine.paramspace import paramspace
+
+from darwin.engine.opt import agtfactory
+
+__log = logging.getLogger('darwin')
 
 class searchspace(abc.ABC):
 
-    # def __init__(self, name, m, n, engine, maps):
-    def __init__(self, name, dmap, engine):
+    def __init__(self, name, engine):
+    # def __init__(self, name, dmap, engine):
 
         if not isinstance(name, str):
             print('searchspace given name not a string')
             sys.exit(1)
 
+        self._name = name
         # common definitions
-        self._m = dmap['m'] # number of agents (solutions)
-        self._n = dmap['n'] # number of decision variables
-        self._iterations = 0 # number of iterations for convergence
+        self._m = None
+        self._n = None
+
+        # self._m = dmap['m'] # number of agents (solutions)
+        # self._n = dmap['n'] # number of decision variables
 
         self._a = [] # array of pointers to agents
-        for i in range(self._m):
-            self.a.append(agf.create_agent(name, self._n, engine))
+        # for i in range(self._m):
+        #     self.a.append(agf.create_agent(name, self._n, engine))
 
-            for j in range(self._n):
-                _,v = maps[j]
-                self.a[i].x[j] = v.uniform_random_element()
+        #     for j in self._n:
+        #     # for j in range(self._n):
+        #         _,v = maps[j]
+        #         self.a[i].x[j] = v.uniform_random_element()
 
         # self._LB = [] # lower boundaries of each decision variable
         # self._UB = [] # upper boundaries of each decision variable
@@ -32,7 +42,7 @@ class searchspace(abc.ABC):
         self._best = 0 # index of the best agent
 
         self._g = [] # global best agent
-        for i in range(self._n):
+        for i in self._n:
             self._g.append(0)
 
         # global best fitness
@@ -66,9 +76,42 @@ class searchspace(abc.ABC):
 
         # self._tree_fit = 0.0 # fitness of each tree (in GP, the number of agents is different from the number of trees)
 
+    def init_agents(self, m=None):
+
+        # get the mapping parameters
+        maps = paramspace()
+
+        # verify if values exist
+        if self._n is None:
+            __log.error('user must set the "n" iterable containing the parameters\
+                    for this searchspace')
+            sys.exit(1)
+
+        if m is not None:
+            self._m = m
+        elif self._m is None:
+            __log.error('user must set the "n" iterable containing the parameters\
+                    for this searchspace')
+            sys.exit(1)
+
+        # reset agent list if called again
+        self._a = []
+
+        for i in range(self._m):
+            self.a.append(agtfactory.create_agent(self._name, self._n, engine))
+
+            for j in self._n:
+            # for j in range(self._n):
+                _,v = maps[j]
+                self.a[i].x[j] = v.uniform_random_element()
+
     @property
     def m(self):
         return self._m
+
+    @property
+    def n(self):
+        return self._n
 
     @property
     def a(self):
@@ -79,10 +122,13 @@ class searchspace(abc.ABC):
                 .format(self._m, self._n))
 
     @abc.abstractmethod
-    # def evaluate(self, func, maps):
-    def evaluate(self):
+    def schedule(self):
+        raise NotImplementedError()
+
+    @abc.abstractmethod
+    def update(self):
         raise NotImplementedError()
 
     @abc.abstractmethod
     def check(self):
-        pass
+        raise NotImplementedError()
