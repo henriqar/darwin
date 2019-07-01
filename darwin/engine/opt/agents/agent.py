@@ -1,22 +1,22 @@
 
 import abc
+import logging
 import sys
 
-class agent(abc.ABC):
+_log = logging.getLogger('darwin')
 
-    def __init__(self, n, engine):
+class Agent(abc.ABC):
+
+    def __init__(self, n):
 
         if not isinstance(n, tuple):
-            __log.error('agent must receive an iterable with the params used')
+            _log.error('agent must receive an iterable with the params used')
 
         # common definitions
         self._n = n
 
         # set the intermediate result for each simulation
         self._intermediate = sys.maxsize
-
-        # save the engine used
-        self._engine = engine
 
         self._x = [] # position
         # for i in range(n):
@@ -32,6 +32,14 @@ class agent(abc.ABC):
         # TensorPSO
         self._t_v = [] # tensor velocity (matrix)
         self._t_xl = [] # tensor local best (matrix)
+
+        # define the executor to be used
+        self._executor = None
+
+        self._pspace = None
+
+    def set_pspace(self, pspace):
+        self._pspace = pspace
 
     @property
     def intermediate(self):
@@ -100,6 +108,11 @@ class agent(abc.ABC):
     def copy(self):
         pass
 
+    def register_executor(self, executor):
+
+        # register the executor used
+        self._executor = executor
+
     # def evaluate(self, func, maps):
     def schedule(self):
 
@@ -109,7 +122,8 @@ class agent(abc.ABC):
         args = {}
         for i in self._n:
         # for i in range(self._n):
-            k, v = self._maps[i]
+            k, v = self._pspace[i]
+            # k, v = self._maps[i]
             args[k] = v[self._x[i]]
 
-        self._executor.register_job((self, args))
+        self._executor.register_job(self, args)

@@ -1,21 +1,30 @@
 
-from ._ga import ga
-# from ._abc import abc
-# from ._abo import abo
-# from ._ba import ba
-# from ._bha import bha
-# from ._bsa import bsa
-# from ._bso import bso
-# from ._cs import cs
-# from ._de import de
-# from ._fa import fa
-# from ._fpa import fpa
-# from ._gp import gp
-# from ._hs import hs
-# from ._jade import jade
-# from ._loa import loa
-# from ._mbo import mbo
-# from ._pso import pso
-# from ._sa import sa
-# from ._wca import wca
-# from ._cobide import cobide
+from importlib import import_module
+
+from .agent import Agent
+
+from darwin._constants import opt
+
+def factory(name, *args, **kwargs):
+
+    try:
+
+        if not hasattr(opt, name):
+            raise ValueError('unexpected agent value "{}"'.format(name))
+        else:
+            module_name = name.lower()
+            class_name = name.lower().capitalize()
+
+        agent_module = import_module('.' + module_name,
+                package='darwin.engine.opt.agents')
+        agent_class = getattr(agent_module, class_name)
+
+        instance = agent_class(*args, **kwargs)
+
+    except (AttributeError, ImportError):
+        raise ImportError('{} is not a child of agent'. format(name))
+    else:
+        if not issubclass(agent_class, Agent):
+            raise ImportError('there is no {} agent implemented')
+
+    return instance

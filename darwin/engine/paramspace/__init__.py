@@ -1,2 +1,2 @@
 
-from ._paramspace import paramspace
+from .paramspace import Paramspace

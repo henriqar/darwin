@@ -1,2 +1,2 @@
 
-from darwin.dsl.map import Map
+from .algorithm import Algorithm

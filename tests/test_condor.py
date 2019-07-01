@@ -11,7 +11,7 @@ def Quadratic(map1=None, map2=None):
 opt = darwin.algorithm('ga')
 
 # set cluster usage
-opt.set_exec_engine(engine=darwin.constants.HTCONDOR)
+opt.set_exec_engine(engine=darwin.drm.HTCONDOR)
 
 map1 = (1,2,3,4)
 map2 = ('a', 'b', 'c', 'd')

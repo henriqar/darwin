@@ -3,8 +3,8 @@
 # Submit description file
 ###########################
 
-executable    = sleep.sh
+executable    = htcondor.sh
 universe      = vanilla  
 output        = darwin.out
 log           = darwin.log
-queue
+queue 2

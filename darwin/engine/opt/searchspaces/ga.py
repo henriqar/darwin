@@ -2,19 +2,21 @@
 import logging
 import sys
 
-from .searchspace import searchspace
+from . import Searchspace
 
-__log = logging.getLogger('darwin')
+from darwin._constants import opt
 
-class ga(searchspace):
+_log = logging.getLogger('darwin')
 
-    def __init__(self, engine, mutation_probability=None):
+class Ga(Searchspace):
+
+    def __init__(self, mutation_probability=None):
 
         # call super from searchspace base class
-        super().__init__('ga', engine)
+        super().__init__(opt.GA)
 
         if mutation_probability == None:
-            __log.error('error: GA searchspace requires a mutation\
+            _log.error('error: GA searchspace requires a mutation\
                     probability value to work')
             sys.exit(1)
 

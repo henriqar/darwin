@@ -1,7 +1,7 @@
 
-from .agent import agent
+from . import Agent
 
-class ga(agent):
+class Ga(Agent):
 
     def check_limits(self):
         pass

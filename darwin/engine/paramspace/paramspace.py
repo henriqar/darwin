@@ -1,28 +1,28 @@
 
-import functools
 
 import numpy as np
 
-from ._node import node
-
 from types import MappingProxyType
 
-from darwin.engine.opt import spfactory
+from .node import Node
 
-class paramspace:
+# from darwin.engine.opt import searchspaces as sp
+
+from .map import Map
+
+import darwin.engine.opt.searchspaces as sp
+
+class Paramspace:
 
     # create the singleton pattern
     __instance = None
 
     def __new__(cls):
-        if paramspace.__instance is None:
-            paramspace.__instance = super().__new__(cls)
-        return paramspace.__instance
+        if Paramspace.__instance is None:
+            Paramspace.__instance = super().__new__(cls)
+        return Paramspace.__instance
 
     def __init__(self):
-
-        # searchspaces variables
-        self._n = 0
 
         # each set will be indexed by and id, created using the name of the
         # parameter. The parameters will be automatically mapped to a discrete
@@ -41,7 +41,7 @@ class paramspace:
         self._wt = None
         self._wp = None
 
-    def __item__(self, idx):
+    def __getitem__(self, idx):
         return self._params[idx]
 
     def __len__(self):
@@ -62,7 +62,7 @@ class paramspace:
 
         if isinstance(param, tuple):
             # force mapparam to be tuple, not modifyable
-            self._params[self._param_id] = (name, param)
+            self._params[self._param_id] = (name, Map(param, discrete))
             self._param_id += 1
             return self._param_id - 1
         else:
@@ -81,7 +81,7 @@ class paramspace:
     def build(self):
 
         # create tree root with all elements
-        self._tree_root = node(tuple([i for i in range(self._param_id)]))
+        self._tree_root = Node(tuple([i for i in range(self._param_id)]))
 
         # build random space using the tree structure
         for ex in self._exclusive_groups:
@@ -127,18 +127,17 @@ class paramspace:
         sumw = sum(self._wt)
         self._wp = tuple(map(lambda i: i/sumw, self._wt))
 
-    def create_searchspaces(self, opt_alg)
-
-        # initialize the searchspac factory
-        spfactory.init_factory()
+    def create_searchspaces(self, opt_alg, kwargs):
 
         # create a list of searchspaces basd on the parameters found
         searchspaces = []
         for params in self._pt:
 
             # searchspace aux
-            spaux = spfactory.create_searchspace(opt_alg, engine, self._kwargs)
+            spaux = sp.factory(opt_alg, kwargs)
+            # spaux = spfactory.create_searchspace(opt_alg, kwargs)
             spaux.n = params
+            spaux.set_paramspace(self)
 
             searchspaces.append(spaux)
 
