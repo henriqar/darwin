@@ -1,11 +1,16 @@
 
 import copy
+import logging
 
 import numpy as np
 
+from darwin.dsl import DefaultFormatter
+
+_log = logging.getLogger('darwin')
+
 class Map(tuple):
 
-    def __new__(cls, data, discrete=False):
+    def __new__(cls, data, discrete, formatter=DefaultFormatter()):
         try:
             it = iter(data)
         except TypeError :
@@ -13,6 +18,12 @@ class Map(tuple):
         else:
             inst = tuple.__new__(Map, data)
             inst._discrete = discrete
+
+            if formatter is None:
+                _log.error('formatter can not be a NoneType')
+                sys.exit(1)
+            else:
+                inst._formatter = formatter
             return inst
 
     @property

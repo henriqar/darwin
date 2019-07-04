@@ -12,6 +12,8 @@
 
 ## Installation
 
+Jus execute ´´´pip install -r requirements.txt´´´.
+
 ## Features
 
 ## License

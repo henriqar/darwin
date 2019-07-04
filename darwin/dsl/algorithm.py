@@ -47,16 +47,6 @@ class Algorithm():
             _log.error('unexpected optimization algorithm defined')
             sys.exit(1)
 
-        # # optimization algorithms supported
-        # algorithms = ('abc', 'abo', 'ba', 'bha', 'bsa', 'bso', 'cs', 'de',
-        #               'fa', 'fpa', 'ga', 'gp', 'hs', 'jade', 'loa', 'mbo',
-        #               'opt', 'pso', 'sa', 'wca')
-
-        # if opt_alg not in algorithms:
-        #     raise ValueError('value for opt_alg not recognized')
-        # else:
-        #     self._opt_alg = opt_alg
-
         # define the varibale to hold the function to be minimized
         self._func = None
 
@@ -67,11 +57,11 @@ class Algorithm():
         return "darwin.algorithm(opt={}, paramspace={}, exc_groups={})".format(
                 algorithms, self._paramspace, self._exclusive_groups)
 
-    def add_parameter(self, name, param, discrete=False):
+    def add_parameter(self, name, param, formatter=None, discrete=False):
 
         # use the paramspace instance to handle the creation and managing os
         # searchspaces
-        self._pspace.add_param(name=name, param=param, discrete=discrete)
+        self._pspace.add_param(name, param, formatter, discrete)
 
     def add_exclusive_group(self, *groups):
 

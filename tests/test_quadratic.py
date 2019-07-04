@@ -1,9 +1,7 @@
 
 import darwin
 
-def Quadratic(map1=None, map2=None):
-    print('map1: {}, map2: {}'.format(map1, map2))
-
+def Quadratic():
     return 10
 
 # get the algorithm to gbe used for the op[timization
@@ -16,11 +14,12 @@ map2 = ('a', 'b', 'c', 'd')
 opt.add_parameter(name='map1', param=map1, discrete=True)
 opt.add_parameter(name='map2', param=map2, discrete=True)
 
+# default darwin parameters
 opt.function = Quadratic
 opt.agents = 10
 opt.iterations = 10
 
-# exclusive GA parameters
+# exclusive required GA parameters
 opt.mutation_probability = 0.2
 
 opt.start()

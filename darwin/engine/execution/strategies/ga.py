@@ -94,7 +94,7 @@ class Ga(Strategy):
                 searchspace.schedule()
 
                 # create a generator using yield
-                yield
+                yield t
 
         print('OK (minimum fitness value {})'.format(searchspace.gfit))
 

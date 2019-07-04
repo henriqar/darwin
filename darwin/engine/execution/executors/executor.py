@@ -1,6 +1,7 @@
 
 import abc
-import configparser as cp
+import configparser
+import collections
 import logging
 import os
 import sys
@@ -30,15 +31,13 @@ class Executor(abc.ABC):
     # define single instance (singleton)
     _instance = None
 
-    # define the arbiter for jobs executed
-    # ARBITER = cnts.ROUND_ROBIN
-
     def __new__(cls, *args, **kwargs):
         if Executor._instance is None:
             Executor._instance = super().__new__(cls)
         return Executor._instance
 
-    def __init__(self, func, method, filename='darwin.submit', procs=1, timeout=None):
+    def __init__(self, func, method, filename='darwin.submit', procs=1,
+            timeout=None):
 
         # verify if submit file exists
         if not os.path.isfile(filename):
@@ -52,6 +51,15 @@ class Executor(abc.ABC):
         # get the submit file for the darwin application
         self._submitf = configparser.ConfigParser()
         self._submitf.read(filename)
+
+        if 'arguments' in self._submitf['htcondor']:
+            del self._submitf['htcondor']['arguments']
+
+        if 'initialdir' in self._submitf['htcondor']:
+            del self._submitf['htcondor']['initialdir']
+
+        # define the root dir
+        self._root_dir = os.getcwd()
 
         # save the func to be executed
         self._func = func
@@ -87,12 +95,16 @@ class Executor(abc.ABC):
         string = ''
 
     @abc.abstractmethod
+    def _evaluate(self, it):
+        raise NotImplementedError
+
+    @abc.abstractmethod
     def _execute(self):
-        pass
+        raise NotImplementedError
 
     @abc.abstractmethod
     def _wait(self):
-        pass
+        raise NotImplementedError
 
     def execute(self, searchspaces):
 
@@ -105,6 +117,8 @@ class Executor(abc.ABC):
             # create all generators used inside the excution process
             generators.append(self._strategy.execute_step(sp))
 
+        iteration = 0
+
         finished = False
         while not finished:
 
@@ -114,6 +128,12 @@ class Executor(abc.ABC):
             # wait for execution if needed (cluster exec will block here until
             # the results are ready to be collected)
             self._wait()
+
+            # get the results and generate each fitnes in each folder
+            # for every agent in every iteration
+            self._evaluate(iteration)
+
+            iteration += 1
 
             try:
                 for gen in generators:

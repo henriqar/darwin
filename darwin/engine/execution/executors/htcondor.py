@@ -43,6 +43,24 @@ class Htcondor(executor):
     _JOB_TRANSFERING_OUTPUT = 5
     _JOB_SUSPENDED = 6
 
+    def _evaluate(self, it):
+
+        os.mkdirs(os.join(self._root_dir, it))
+
+        for index, (clusterid, v) in enumerate(self._job_ref.items()):
+
+            agent_ref, ads = v
+            with agent_dir(index) as child_path:
+
+                # create child dir
+                os.makedirs(child_path)
+
+                # call retrieve ads from htcondor in this directory
+                self._schedd.retrieve("ClusterId == %d".format(clusterid))
+
+                # call function to extract fitness value from execution
+                agent_ref.intermediate = self._func()
+
     def _execute(self):
 
         # secure the joib id from condor
@@ -53,20 +71,17 @@ class Htcondor(executor):
             # pop value and get agent ref and args for it
             agent, arg = self._jobs.pop()
 
-            if 'arguments' in self._submitf['htcondor']:
-                del self._submitf['htcondor']['arguments']
+            arguments = ' '.join('-%s %s' % tup for tup in arg.items())
+            self._submitf['arguments'] = arguments
 
             # get redirect of htcondor submit file to a dict
             sub = htcondor.Submit(self._submitf['htcondor'])
 
             with self._schedd.transaction() as txn:
                 ads = []
-                clusterid = sub.queue(txn, ad_result)
+                clusterid = sub.queue(txn, ads)
                 self._job_ref[clusterid] = (agent, ads)
-                self._schedd.spool(ad_result)
-
-        # retrieve with
-        self._schedd.retrieve("ClusterId == %d" % clusuterid)
+                self._schedd.spool(ads)
 
     def _wait(self):
 

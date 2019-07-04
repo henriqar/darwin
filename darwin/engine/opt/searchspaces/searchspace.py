@@ -30,13 +30,9 @@ class Searchspace(abc.ABC):
         self._t_g = [] # global best tensor (matrix)
         self._best = 0 # index of the best agent
 
-        self._g = [] # global best agent
-        # for i in self._n:
-        #     self._g.append(sys.maxsize)
-            # self._g.append(0)
-
-        # global best fitness
+        # global best fitness and corresponding agent values
         self._gfit = sys.float_info.max
+        self._g = []
 
         self._is_integer_opt = False # integer-valued optimization problem?
         self._tensor_dim = 0 # dimension of the tensor

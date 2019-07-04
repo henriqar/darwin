@@ -1,6 +1,7 @@
 
 
 from .dsl import Algorithm
+from .dsl import Formatter
 
 from ._constants import drm
 from ._constants import opt

@@ -6,8 +6,6 @@ from types import MappingProxyType
 
 from .node import Node
 
-# from darwin.engine.opt import searchspaces as sp
-
 from .map import Map
 
 import darwin.engine.opt.searchspaces as sp
@@ -55,15 +53,20 @@ class Paramspace:
     def combinations(self):
         return sum(self._wt)
 
-    def add_param(self, name=None, param=None, discrete=False):
-
-        if name is None or name == '':
-            raise TypeError("param name must be defined, got '{}'".format(name))
+    def add_param(self, name, param, formatter, discrete):
 
         if isinstance(param, tuple):
+
+            # create map
+            if formatter is not None:
+                m = Map(param, discrete, formatter=formatter)
+            else:
+                m = Map(param, discrete)
+
             # force mapparam to be tuple, not modifyable
-            self._params[self._param_id] = (name, Map(param, discrete))
+            self._params[self._param_id] = (name, m)
             self._param_id += 1
+
             return self._param_id - 1
         else:
             raise TypeError("error: map parameter must be a tuple type")

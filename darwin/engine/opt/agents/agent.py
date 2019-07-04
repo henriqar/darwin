@@ -47,6 +47,13 @@ class Agent(abc.ABC):
 
     @intermediate.setter
     def intermediate(self, val):
+        """
+        This is a reST style.
+
+        :param val: this is a first parameter
+        :returns: This is a description os what is returned
+        :raises TypeError: raises an exception if bla
+        """
         if not isinstance(val, int) and not isinstance(val, float):
             raise TypeError('expected <int> or <float>, got {} for min '
                 'function return'.format(type(val)))

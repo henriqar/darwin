@@ -44,14 +44,17 @@ _log = logging.getLogger('darwin')
 
 class Local(Executor):
 
+    def _evaluate(self, it):
+        pass
+
     def _execute(self):
 
-        if self.workers > 1:
+        if self._workers > 1:
             _log.error('local parallel not supported yet')
             sys.exit(1)
 
         # create pool to execute local jobs
-        with concurrent.futures.ProcessPoolExecutor(max_workers=self._workers) as executor:
+        with concurrent.future.ProcessPoolExecutor(max_workers=self._workers) as executor:
 
             # get iterable from searchspace dict
             it_rootdir = os.path.join(self._root_dir, 'iteration_{}'.format(it))
