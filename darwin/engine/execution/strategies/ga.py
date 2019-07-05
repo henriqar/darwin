@@ -1,13 +1,12 @@
 
 import logging
-import sys
 import math
-
 import numpy as np
+import sys
 
 from . import Strategy
 
-_log = logging.getLogger('darwin')
+_log = logging.getLogger(__name__)
 
 def RouletteSelectionGA(population, k):
     maximum = sum([c.fit for c in population])

@@ -1,12 +1,12 @@
 
+import copy
 import logging
 import sys
 
+from darwin._constants import opt
 from . import Searchspace
 
-from darwin._constants import opt
-
-_log = logging.getLogger('darwin')
+_log = logging.getLogger(__name__)
 
 class Ga(Searchspace):
 
@@ -61,10 +61,10 @@ class Ga(Searchspace):
 
             if self.a[i].fit < self._gfit:
 
-                self.gfit = self.a[i].fit
+                self._gfit = self.a[i].fit
 
-                for j in range(self._n):
-                    self._g[j] = self.a[i].x[j]
+                # for j in range(self._n):
+                self._g = copy.deepcopy(self.a[i].x)
 
 
     def check(self):

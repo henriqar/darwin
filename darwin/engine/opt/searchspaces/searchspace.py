@@ -5,7 +5,7 @@ import sys
 
 import darwin.engine.opt.agents as agents
 
-_log = logging.getLogger('darwin')
+_log = logging.getLogger(__name__)
 
 class Searchspace(abc.ABC):
 

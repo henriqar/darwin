@@ -1,12 +1,11 @@
 
 import copy
 import logging
-
 import numpy as np
 
 from darwin.dsl import DefaultFormatter
 
-_log = logging.getLogger('darwin')
+_log = logging.getLogger(__name__)
 
 class Map(tuple):
 

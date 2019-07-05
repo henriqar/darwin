@@ -1,15 +1,15 @@
 
-import configparser as cp
+
+import classad
 import collections
 import concurrent
+import configparser as cp
 import datetime
+import htcondor
 import logging
 import os
 import sys
 import time
-
-import htcondor
-import classad
 
 from contextlib import contextmanager
 
@@ -40,7 +40,7 @@ def agent_dir(child):
 #     # call the func
 #     func(**kwargs)
 
-_log = logging.getLogger('darwin')
+_log = logging.getLogger(__name__)
 
 class Local(Executor):
     def _prepare_job_args(self):

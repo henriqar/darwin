@@ -1,14 +1,16 @@
 
-
+import logging
 import numpy as np
 
 from types import MappingProxyType
 
-from .node import Node
+import darwin.engine.opt.searchspaces as sp
 
 from .map import Map
+from .node import Node
 
-import darwin.engine.opt.searchspaces as sp
+
+_log = logging.getLogger(__name__)
 
 class Paramspace:
 

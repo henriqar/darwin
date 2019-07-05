@@ -1,14 +1,14 @@
 
+
 import abc
-import configparser
 import collections
+import configparser
+import htcondor
 import logging
 import os
-import sys
 import shutil
+import sys
 import time
-
-import htcondor
 
 from darwin._constants import drm
 
@@ -26,7 +26,7 @@ from darwin._constants import drm
 #     # call the func
 #     func(**kwargs)
 
-_log = logging.getLogger('darwin')
+_log = logging.getLogger(__name__)
 
 # context in strategy pattern
 class Executor(abc.ABC):
@@ -159,6 +159,10 @@ class Executor(abc.ABC):
             # get the results and generate each fitnes in each folder
             # for every agent in every iteration
             self._evaluate(curr_dir)
+
+            # update searchspaces
+            for sp in searchspaces:
+                sp.update()
 
             iteration += 1
 

@@ -3,7 +3,7 @@ import abc
 import logging
 import sys
 
-_log = logging.getLogger('darwin')
+_log = logging.getLogger(__name__)
 
 class Agent(abc.ABC):
 

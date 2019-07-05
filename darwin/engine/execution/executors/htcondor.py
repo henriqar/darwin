@@ -1,16 +1,15 @@
 
-from configparser import NoSectionError, NoOptionError
+import classad
 import collections
 import concurrent
 import datetime
+import htcondor
 import logging
 import os
 import sys
 import time
 
-import htcondor
-import classad
-
+from configparser import NoSectionError, NoOptionError
 from contextlib import contextmanager
 
 from . import Executor
@@ -25,7 +24,7 @@ def agent_dir(child):
     finally:
         os.chdir(parent_dir)
 
-_log = logging.getLogger('darwin')
+_log = logging.getLogger(__name__)
 
 # context in strategy pattern
 class Htcondor(Executor):
@@ -83,7 +82,7 @@ class Htcondor(Executor):
                 self._job_ref[clusterid] = (agent, ads, agent_dir_name)
                 # self._schedd.spool(ads)
 
-            # incremetn index
+            # increment index
             index += 1
 
     def _wait(self):

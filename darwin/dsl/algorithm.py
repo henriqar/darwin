@@ -4,34 +4,17 @@ import os
 import platform
 import sys
 
-import darwin.engine.execution.strategies as strategies
 import darwin.engine.execution.executors as executors
-
-from  darwin.engine.paramspace import Paramspace
+import darwin.engine.execution.strategies as strategies
 
 from darwin._constants import opt, drm
+from darwin.engine.paramspace import Paramspace
 
-_log = logging.getLogger('darwin')
+_log = logging.getLogger(__name__)
 
 class Algorithm():
 
     def __init__(self, opt_alg, log_file='darwin.log'):
-
-        # instantiate and create the project logger
-        cmd_handler = logging.StreamHandler()
-        file_handler = logging.FileHandler(log_file)
-
-        cmd_handler.setLevel(logging.DEBUG)
-        file_handler.setLevel(logging.INFO)
-
-        cmd_handler.setFormatter(logging.Formatter('%(levelname)s - '
-                '%(message)s'))
-        file_handler.setFormatter(logging.Formatter('%(asctime)s - %(name)s - '
-                '%(levelname)s - %(message)s'))
-
-        # add handlers to logger
-        _log.addHandler(cmd_handler)
-        _log.addHandler(file_handler)
 
         # create paramspace
         self._pspace = Paramspace()
@@ -43,6 +26,7 @@ class Algorithm():
 
         if hasattr(opt, opt_alg):
             self._opt_alg = opt_alg
+            print('Opt algorithm chosen -> ', self._opt_alg)
         else:
             _log.error('unexpected optimization algorithm defined')
             sys.exit(1)
@@ -93,6 +77,7 @@ class Algorithm():
             _log.error('unexpected executor value {}'.format(executor))
             sys.exit(1)
         else:
+            print('DRM engine chosen -> {}'.format(executor))
             self._executor = executor
 
     @property
@@ -120,11 +105,11 @@ class Algorithm():
     def start(self):
 
         if len(self._pspace) == 0:
-            _log.error('error: no map specified')
+            _log.error('no map specified')
             sys.exit(1)
 
         if self._func is None:
-            _log.error('error: no function to be minimized was specified')
+            _log.error('no function to be minimized was specified')
             sys.exit(1)
 
         # create paramspace and the corresponfding searchspaces to find the
@@ -145,9 +130,9 @@ class Algorithm():
                 self._executor, procs=1, timeout=None)
         exec_engine.register_strategy(optimization)
 
-        _log.info('Parameters` space comprehends {} tests, executing a subset \
-                with {} tests.'.format(self._pspace.combinations,
-                    self._m*self._max_itrs))
+        # _log.info('Parameters space comprehends {} tests, executing a subset \
+        #         with {} tests.'.format(self._pspace.combinations,
+        #             self._m*self._max_itrs))
 
         exec_engine.execute(searchspaces)
 
