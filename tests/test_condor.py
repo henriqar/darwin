@@ -11,8 +11,8 @@ opt = darwin.Algorithm(darwin.opt.GA)
 map1 = (1,2,3,4)
 map2 = ('a', 'b', 'c', 'd')
 
-opt.add_parameter(name='map1', param=map1, discrete=True)
-opt.add_parameter(name='map2', param=map2, discrete=True)
+opt.add_parameter('map1', map1, discrete=True)
+opt.add_parameter('map2', map2, discrete=True)
 
 # define htcondor execution engine
 opt.exec_engine = darwin.drm.HTCONDOR

@@ -25,6 +25,11 @@ class Ga(Searchspace):
         self._pMutation = mutation_probability # probability of mutation
         self._pCrossover = 0.0 # probability of crossover
 
+
+    @property
+    def pMutation(self):
+        return self._pMutation
+
     def show(self):
 
         # call super to show basic data

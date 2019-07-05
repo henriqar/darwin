@@ -6,46 +6,56 @@
 
 [darwin]
 
+# (TODO)
 # define the collector from htcondor to use
 collector=lsc.ic.unicamp.br
 
 # always refresh on 'x' seconds, default: 60
-refresh_rate=60
+refresh_rate=2
 
+# (TODO)
+# 1 execution medium time in seconds
+exec_time=15
+
+# DEPRE
 # define the job file structure to be created
-dirs=logs
+# dirs=logs
 
 # define the strategy to monitor agent job
 # can be: pool; event
-agent_monitoring=pool
+# agent_monitoring=pool
 
 # here we use all methods to delegate to condor
 # although the user shoukld take care of defining the directoires
 # and how the program work
 [htcondor]
 
-executable=/bin/sleep
+#executable=/bin/sleep
+executable=htcondor.sh
 
 universe=vanilla
 
-error=%(darwin_ag)s/logs/err.$(ClusterId)
+#error=%(darwin_ag)s/logs/err.$(ClusterId)
+error=err.$(ClusterId)
 
-output=%(darwin_ag)s/logs/out.$(ClusterId)
+#output=%(darwin_ag)s/logs/out.$(ClusterId)
+output=out.$(ClusterId)
 
-log=%(darwin_ag)s/logs/log.$(ClusterId)
+#log=%(darwin_ag)s/logs/log.$(ClusterId)
+log=log.$(ClusterId)
 
-initialdir=files
+#initialdir=files
 
 # in the case where the filesystem is not shared, if shared use NO
 should_transfer_files = YES
 
-when_to_transfer_output = ON_EXIT
+#when_to_transfer_output = ON_EXIT
 #transfer_input_files = files/in1,files/in2
 #transfer_output_files = %(darwin_ag)s/files/
 
 #Arguments       = in1 in2 out1
 
-requirements=( TARGET.Arch == "X86_64" ) && ( TARGET.OpSys == "LINUX" ) && ( TARGET.Disk >= 0 ) && ( TARGET.Memory >= RequestMemory ) && ( ( TARGET.HasFileTransfer ) || ( TARGET.FileSystemDomain == MY.FileSystemDomain ) )
-rank=memory
-image_Size=28000
+#requirements=( TARGET.Arch == "X86_64" ) && ( TARGET.OpSys == "LINUX" ) && ( TARGET.Disk >= 0 ) && ( TARGET.Memory >= RequestMemory ) && ( ( TARGET.HasFileTransfer ) || ( TARGET.FileSystemDomain == MY.FileSystemDomain ) )
+#rank=memory
+#image_Size=28000
 

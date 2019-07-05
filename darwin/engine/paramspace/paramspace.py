@@ -137,7 +137,7 @@ class Paramspace:
         for params in self._pt:
 
             # searchspace aux
-            spaux = sp.factory(opt_alg, kwargs)
+            spaux = sp.factory(opt_alg, **kwargs)
             # spaux = spfactory.create_searchspace(opt_alg, kwargs)
             spaux.n = params
             spaux.set_paramspace(self)

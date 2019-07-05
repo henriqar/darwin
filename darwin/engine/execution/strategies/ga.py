@@ -77,7 +77,7 @@ class Ga(Strategy):
 		# It performs the mutation
                 for j in range(m):
 
-                    if np.random.uniform(0, 1) <= searchspace._pMutation:
+                    if np.random.uniform(0, 1) <= searchspace.pMutation:
 
                         mutation_index = np.random.randint(0, len(n))
                         # import pdb; pdb.set_trace()
@@ -90,11 +90,11 @@ class Ga(Strategy):
                     # for k in range(n):
                         searchspace.a[j].x[k] = tmp[j][k]
 
-                # searchspace.schedule(func, maps)
-                searchspace.schedule()
+            # searchspace.schedule(func, maps)
+            searchspace.schedule()
 
-                # create a generator using yield
-                yield t
+            # create a generator using yield
+            yield t
 
         print('OK (minimum fitness value {})'.format(searchspace.gfit))
 

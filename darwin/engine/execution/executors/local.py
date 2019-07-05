@@ -43,11 +43,13 @@ def agent_dir(child):
 _log = logging.getLogger('darwin')
 
 class Local(Executor):
+    def _prepare_job_args(self):
+        raise NotImplementedError
 
-    def _evaluate(self, it):
-        pass
+    def _evaluate(self, curr_dir):
+        raise NotImplementedError
 
-    def _execute(self):
+    def _execute(self, curr_dir):
 
         if self._workers > 1:
             _log.error('local parallel not supported yet')
@@ -67,4 +69,4 @@ class Local(Executor):
             executor.map(func_wrapper, rootdir, agentid, kwargs)
 
     def _wait(self):
-        pass
+        raise NotImplementedError

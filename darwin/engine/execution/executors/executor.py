@@ -5,7 +5,10 @@ import collections
 import logging
 import os
 import sys
+import shutil
 import time
+
+import htcondor
 
 from darwin._constants import drm
 
@@ -57,9 +60,12 @@ class Executor(abc.ABC):
 
         if 'initialdir' in self._submitf['htcondor']:
             del self._submitf['htcondor']['initialdir']
+            self._submitf['htcondor']['initialdir'] = os.getcwd()
 
-        # define the root dir
+        # define the root dir and the opt dir
         self._root_dir = os.getcwd()
+        self._opt_dir = self._root_dir
+        self._opt_dir_name = ''
 
         # save the func to be executed
         self._func = func
@@ -91,22 +97,38 @@ class Executor(abc.ABC):
     def _verify_submit_file(self):
         pass
 
-    def _prepare_job_args(self):
-        string = ''
-
     @abc.abstractmethod
-    def _evaluate(self, it):
+    def _prepare_job_args(self):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def _execute(self):
+    def _evaluate(self, curr_dir):
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def _execute(self, curr_dir):
         raise NotImplementedError
 
     @abc.abstractmethod
     def _wait(self):
         raise NotImplementedError
 
+    def _create_environment(self, env='darwin.opt'):
+
+        self._opt_dir = os.path.join(self._root_dir, env)
+        self._opt_dir_name = env
+
+        if os.path.exists(self._opt_dir) and os.path.isdir(self._opt_dir):
+            # remove dir and create a new one
+            shutil.rmtree(self._opt_dir, ignore_errors=True)
+
+        os.makedirs(self._opt_dir)
+
     def execute(self, searchspaces):
+
+        # create the opt dir and prepare the submit file
+        self._prepare_job_args()
+        self._create_environment()
 
         # register executor for every agent
         generators = []
@@ -117,13 +139,18 @@ class Executor(abc.ABC):
             # create all generators used inside the excution process
             generators.append(self._strategy.execute_step(sp))
 
+        print('-> Runnig initial evaluation')
         iteration = 0
 
         finished = False
         while not finished:
 
+            #create iteration dir inside opt dir
+            curr_dir = os.path.join(self._opt_dir, 'iter_' + str(iteration))
+            os.makedirs(curr_dir)
+
             # execute choosen method (local or cluster)
-            self._execute()
+            self._execute(curr_dir)
 
             # wait for execution if needed (cluster exec will block here until
             # the results are ready to be collected)
@@ -131,7 +158,7 @@ class Executor(abc.ABC):
 
             # get the results and generate each fitnes in each folder
             # for every agent in every iteration
-            self._evaluate(iteration)
+            self._evaluate(curr_dir)
 
             iteration += 1
 
