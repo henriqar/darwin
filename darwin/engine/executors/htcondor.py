@@ -24,7 +24,7 @@ def agent_dir(child):
     finally:
         os.chdir(parent_dir)
 
-_log = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 # context in strategy pattern
 class Htcondor(Executor):
@@ -52,6 +52,11 @@ class Htcondor(Executor):
 
                 # call function to extract fitness value from execution
                 agent_ref.intermediate = self._func()
+
+                if agent_ref.intermediate < 0:
+                    logger.error('negative fitness value found: {}'.format(
+                        agent_ref.intermediate))
+                    sys.exit(1)
 
     def _execute(self, curr_dir):
 

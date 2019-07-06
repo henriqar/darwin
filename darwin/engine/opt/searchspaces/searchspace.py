@@ -5,14 +5,14 @@ import sys
 
 import darwin.engine.opt.agents as agents
 
-_log = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 class Searchspace(abc.ABC):
 
     def __init__(self, name):
 
         if not isinstance(name, str):
-            print('searchspace given name not a string')
+            logger.error('searchspace given name not a string')
             sys.exit(1)
 
         # common definitions
@@ -62,6 +62,13 @@ class Searchspace(abc.ABC):
 
         # self._tree_fit = 0.0 # fitness of each tree (in GP, the number of agents is different from the number of trees)
 
+    def global_fitness(self):
+
+        print('\nBest fitness vector:\n')
+        for i in self._n:
+            name, _ = self._pspace[i]
+            print(name, ':', self._g[i])
+
     def set_paramspace(self, pspace):
         self._pspace = pspace
 
@@ -72,7 +79,7 @@ class Searchspace(abc.ABC):
 
         # verify if values exist
         if self._n is None:
-            _log.error('user must set the "n" iterable containing the parameters'
+            logger.error('user must set the "n" iterable containing the parameters'
                    'for this searchspace')
             sys.exit(1)
 
@@ -96,7 +103,7 @@ class Searchspace(abc.ABC):
     def register_executor(self, executor):
 
         if not self._a:
-            _log.error('agents must be initialized before assignment')
+            logger.error('agents must be initialized before assignment')
             sys.exit(1)
 
         for ag in self._a:

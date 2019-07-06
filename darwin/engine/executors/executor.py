@@ -1,5 +1,4 @@
 
-
 import abc
 import collections
 import configparser
@@ -26,7 +25,7 @@ from darwin._constants import drm
 #     # call the func
 #     func(**kwargs)
 
-_log = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 # context in strategy pattern
 class Executor(abc.ABC):
@@ -39,12 +38,11 @@ class Executor(abc.ABC):
             Executor._instance = super().__new__(cls)
         return Executor._instance
 
-    def __init__(self, func, method, filename='darwin.submit', procs=1,
-            timeout=None):
+    def __init__(self, func, method, filename, procs=1, timeout=None):
 
         # verify if submit file exists
         if not os.path.isfile(filename):
-            _log.error('file "{}" not found, exiting.'.format(filename))
+            logger.error('file "{}" not found, exiting.'.format(filename))
             sys.exit(1)
 
         if method == drm.HTCONDOR:
@@ -139,7 +137,7 @@ class Executor(abc.ABC):
             # create all generators used inside the excution process
             generators.append(self._strategy.execute_step(sp))
 
-        print('-> Runnig initial evaluation')
+        print('Evaluating random initialization of searchspace\n')
         iteration = 0
 
         finished = False
@@ -170,6 +168,7 @@ class Executor(abc.ABC):
                 for gen in generators:
                     next(gen)
             except StopIteration:
+                searchspaces[0].global_fitness()
                 finished = True
 
 

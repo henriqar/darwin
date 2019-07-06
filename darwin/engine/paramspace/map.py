@@ -5,7 +5,7 @@ import numpy as np
 
 from darwin.dsl import DefaultFormatter
 
-_log = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 class Map(tuple):
 
@@ -19,7 +19,7 @@ class Map(tuple):
             inst._discrete = discrete
 
             if formatter is None:
-                _log.error('formatter can not be a NoneType')
+                logger.error('formatter can not be a NoneType')
                 sys.exit(1)
             else:
                 inst._formatter = formatter
@@ -38,6 +38,10 @@ class Map(tuple):
             return len(self)-1
         else:
             return self[-1]
+
+    @property
+    def discrete(self):
+        return self._discrete
 
     def uniform_random_element(self):
         if self._discrete:

@@ -16,7 +16,7 @@ def factory(name, *args, **kwargs):
             class_name = name.lower().capitalize()
 
         executor_module = import_module('.' + module_name,
-                package='darwin.engine.execution.executors')
+                package='darwin.engine.executors')
         executor_class = getattr(executor_module, class_name)
 
         instance = executor_class(*args, **kwargs)

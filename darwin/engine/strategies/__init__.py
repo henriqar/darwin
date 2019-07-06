@@ -17,7 +17,7 @@ def factory(name, *args, **kwargs):
             class_name = name.lower().capitalize()
 
         strategy_module = import_module('.' + module_name,
-                package='darwin.engine.execution.strategies')
+                package='darwin.engine.strategies')
         strategy_class = getattr(strategy_module, class_name)
 
         instance = strategy_class(*args, **kwargs)

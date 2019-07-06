@@ -1,20 +1,27 @@
 
+import datetime
 import logging
 import os
 import platform
 import sys
+import time
 
-import darwin.engine.execution.executors as executors
-import darwin.engine.execution.strategies as strategies
+import darwin.engine.executors as executors
+import darwin.engine.strategies as strategies
 
 from darwin._constants import opt, drm
 from darwin.engine.paramspace import Paramspace
+from darwin.version import __version__
 
-_log = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 class Algorithm():
 
     def __init__(self, opt_alg, log_file='darwin.log'):
+
+        # start printing
+        print('-'*80)
+        print('darwin v{}\n'.format(__version__))
 
         # create paramspace
         self._pspace = Paramspace()
@@ -28,7 +35,7 @@ class Algorithm():
             self._opt_alg = opt_alg
             print('Opt algorithm chosen -> ', self._opt_alg)
         else:
-            _log.error('unexpected optimization algorithm defined')
+            logger.error('unexpected optimization algorithm defined')
             sys.exit(1)
 
         # define the varibale to hold the function to be minimized
@@ -36,10 +43,6 @@ class Algorithm():
 
         # create the dictionary to call the fectories with kwargs
         self._kwargs = {}
-
-    def __repr__(self):
-        return "darwin.algorithm(opt={}, paramspace={}, exc_groups={})".format(
-                algorithms, self._paramspace, self._exclusive_groups)
 
     def add_parameter(self, name, param, formatter=None, discrete=False):
 
@@ -64,7 +67,7 @@ class Algorithm():
         if callable(func):
             self._func = func
         else:
-            _log.error('func {} is not a callable object'.format(func))
+            logger.error('func {} is not a callable object'.format(func))
             sys.exit(1)
 
     @property
@@ -74,7 +77,7 @@ class Algorithm():
     @exec_engine.setter
     def exec_engine(self, executor):
         if not hasattr(drm, executor):
-            _log.error('unexpected executor value {}'.format(executor))
+            logger.error('unexpected executor value {}'.format(executor))
             sys.exit(1)
         else:
             print('DRM engine chosen -> {}'.format(executor))
@@ -89,7 +92,7 @@ class Algorithm():
 
         # define how many agents to be used
         if nro_agents <= 0:
-            _log.error('incorrect number of agents: {}'.format(nro_agents))
+            logger.error('incorrect number of agents: {}'.format(nro_agents))
             sys.exit(1)
         else:
             self._m = int(nro_agents)
@@ -101,15 +104,16 @@ class Algorithm():
     @iterations.setter
     def iterations(self, max_itrs):
         self._max_itrs = int(max_itrs)
+        print('Max iterations -> {}'.format(self._max_itrs))
 
-    def start(self):
+    def start(self, filename='darwin.submit'):
 
         if len(self._pspace) == 0:
-            _log.error('no map specified')
+            logger.error('no map specified')
             sys.exit(1)
 
         if self._func is None:
-            _log.error('no function to be minimized was specified')
+            logger.error('no function to be minimized was specified')
             sys.exit(1)
 
         # create paramspace and the corresponfding searchspaces to find the
@@ -127,14 +131,17 @@ class Algorithm():
 
         # create executor
         exec_engine = executors.factory(self._executor, self._func,
-                self._executor, procs=1, timeout=None)
+                self._executor, filename=filename, procs=1, timeout=None)
         exec_engine.register_strategy(optimization)
 
-        # _log.info('Parameters space comprehends {} tests, executing a subset \
-        #         with {} tests.'.format(self._pspace.combinations,
-        #             self._m*self._max_itrs))
+        start_time = time.time()
 
+        print('')
         exec_engine.execute(searchspaces)
+
+        elapsed_time = time.time() - start_time
+        print('\nTotal optimization time: ', datetime.timedelta(
+            seconds=elapsed_time))
 
     # from here on we will create all methods to store specific parameters for
     # each type of optimizations

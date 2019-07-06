@@ -10,7 +10,7 @@ from .map import Map
 from .node import Node
 
 
-_log = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 class Paramspace:
 

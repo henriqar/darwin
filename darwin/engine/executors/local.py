@@ -1,5 +1,4 @@
 
-
 import classad
 import collections
 import concurrent
@@ -40,7 +39,7 @@ def agent_dir(child):
 #     # call the func
 #     func(**kwargs)
 
-_log = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 class Local(Executor):
     def _prepare_job_args(self):
@@ -52,7 +51,7 @@ class Local(Executor):
     def _execute(self, curr_dir):
 
         if self._workers > 1:
-            _log.error('local parallel not supported yet')
+            logger.error('local parallel not supported yet')
             sys.exit(1)
 
         # create pool to execute local jobs

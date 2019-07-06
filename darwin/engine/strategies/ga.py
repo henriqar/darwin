@@ -1,17 +1,27 @@
 
+import datetime
 import logging
 import math
 import numpy as np
 import sys
+import time
 
 from . import Strategy
 
-_log = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 def RouletteSelectionGA(population, k):
     maximum = sum([c.fit for c in population])
     selection_probs = [c.fit/maximum for c in population]
     return np.random.choice(len(population), p=selection_probs, size=k)
+
+def header_output(iteration, fitness, elapsed_time):
+    print(' {:13s} {:20s} {:25s}'.format(
+        iteration, fitness, str(elapsed_time)))
+
+def info_output(iteration, max_itrs, fitness, elapsed_time):
+    print(' {:<13d} {:<20f} {:<25s}'.format(
+        iteration, fitness, str(elapsed_time)))
 
 class Ga(Strategy):
 
@@ -35,9 +45,12 @@ class Ga(Strategy):
 
         tmp = [dict.fromkeys(n, 0) for i in range(m)]
 
+        # create the table of info
+        header_output('Iteration', 'fitness', 'elapsed')
+
         for t in range(max_itrs):
 
-            print('Running generation {}/{}'.format(t+1, max_itrs))
+            # print(' Exec generation {0: >6}/{1:}:'.format(t+1, max_itrs))
 
             for i in range(m):
 
@@ -92,14 +105,17 @@ class Ga(Strategy):
             # searchspace.schedule(func, maps)
             searchspace.schedule()
 
+            # get the time elapsed
+            start_time = time.time()
+
             # create a generator using yield
             yield t
 
-        print('OK (minimum fitness value {})'.format(searchspace.gfit))
+            # get the end time
+            elapsed_time = time.time() - start_time
 
-        # d = {}
-        # # import pdb; pdb.set_trace()
-        # for k, v in self._names.items():
-        #     d[k] = self._sets[v][0]
-        # self._func(*d)
+            # information output
+            info_output(t, max_itrs, searchspace.gfit, datetime.timedelta(seconds=elapsed_time))
+
+        print('\nFINISHED - OK (minimum fitness value {})'.format(searchspace.gfit))
 

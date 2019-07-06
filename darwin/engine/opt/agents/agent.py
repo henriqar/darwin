@@ -3,14 +3,14 @@ import abc
 import logging
 import sys
 
-_log = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 class Agent(abc.ABC):
 
     def __init__(self, n):
 
         if not isinstance(n, tuple):
-            _log.error('agent must receive an iterable with the params used')
+            logger.error('agent must receive an iterable with the params used')
 
         # common definitions
         self._n = n
@@ -131,6 +131,6 @@ class Agent(abc.ABC):
         # for i in range(self._n):
             k, v = self._pspace[i]
             # k, v = self._maps[i]
-            args[k] = v[self._x[i]]
+            args[k] = v[self._x[i]] if v.discrete else self._x[i]
 
         self._executor.register_job(self, args)
