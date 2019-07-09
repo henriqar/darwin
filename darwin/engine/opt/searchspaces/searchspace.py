@@ -10,10 +10,7 @@ logger = logging.getLogger(__name__)
 class Searchspace(abc.ABC):
 
     def __init__(self, name):
-
-        if not isinstance(name, str):
-            logger.error('searchspace given name not a string')
-            sys.exit(1)
+        assert isinstance(name, str)
 
         # common definitions
         self._name = name
@@ -72,7 +69,7 @@ class Searchspace(abc.ABC):
     def set_paramspace(self, pspace):
         self._pspace = pspace
 
-    def init_agents(self, m, pspace):
+    def init_agents(self, m):
 
         # get the mapping parameters
         maps = self._pspace
@@ -90,7 +87,7 @@ class Searchspace(abc.ABC):
 
         for i in range(self._m):
             self.a.append(agents.factory(self._name, self._n))
-            self.a[i].set_pspace(pspace)
+            self.a[i].set_pspace(maps)
 
             for j in self._n:
             # for j in range(self._n):

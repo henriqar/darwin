@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 
 class Map(tuple):
 
-    def __new__(cls, data, discrete, formatter=DefaultFormatter()):
+    def __new__(cls, data, discrete, formatter):
         try:
             it = iter(data)
         except TypeError :
@@ -19,10 +19,11 @@ class Map(tuple):
             inst._discrete = discrete
 
             if formatter is None:
-                logger.error('formatter can not be a NoneType')
-                sys.exit(1)
+                logger.info('map formatter did not set, fallback to default')
+                inst._formatter = DefaultFormatter()
             else:
                 inst._formatter = formatter
+
             return inst
 
     @property
@@ -42,6 +43,9 @@ class Map(tuple):
     @property
     def discrete(self):
         return self._discrete
+
+    def format(self, idx):
+        return self._formatter.format(self[idx])
 
     def uniform_random_element(self):
         if self._discrete:

@@ -3,10 +3,10 @@ import abc
 
 class Strategy(abc.ABC):
 
-    def __init__(self, max_iter, pspace):
+    def __init__(self, data, pspace):
 
         # get the darwin param dict and the kwargs dict
-        self._max_itrs = max_iter
+        self._data = data
         self._pspace = pspace
 
     @abc.abstractmethod

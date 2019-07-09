@@ -2,6 +2,7 @@
 import abc
 import collections
 import configparser
+import contextlib
 import htcondor
 import logging
 import os
@@ -11,24 +12,56 @@ import time
 
 from darwin._constants import drm
 
-# def func_wrapper(func, merged_args):
-
-#     # get all argumetns used
-#     rootdir, agentid, kwargs = merged_args
-
-#     # lets create the dir to execute the agent and change the thread to
-#     # work within this dir
-#     agentdir = os.path.join(rootdir, agentid)
-#     os.makedirs(agentdir)
-#     os.cwd(agentdir)
-
-#     # call the func
-#     func(**kwargs)
-
 logger = logging.getLogger(__name__)
 
-# context in strategy pattern
 class Executor(abc.ABC):
+
+    class PathHandler(contextlib.ContextDecorator):
+
+        def __init__(self, env='darwin.opt'):
+
+            # imutable parameters in life cycle
+            self._root = os.getcwd()
+            self._darwin = os.path.join(self._root, env)
+
+            if os.path.exists(self._darwin) and os.path.isdir(self._darwin):
+                # remove dir and create a new one
+                shutil.rmtree(self._darwin, ignore_errors=True)
+
+            # mutable parameters
+            self._iteration = ''
+            self._agent = ''
+
+        @property
+        def root(self):
+            return self._root
+
+        @property
+        def darwin(self):
+            return self._darwin
+
+        def iteration(self, it):
+            return os.path.join(self._darwin, self._iteration + str(it))
+
+        def agent(self, agt):
+            return os.path.join(self._darwin, self._agent + str(agt))
+
+        def _update(self):
+
+            self._darwin = os.path.join(self._root, env)
+
+            if os.path.exists(self._opt_dir) and os.path.isdir(self._opt_dir):
+                # remove dir and create a new one
+                shutil.rmtree(self._opt_dir, ignore_errors=True)
+
+            os.makedirs(self._opt_dir)
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *exec_details):
+            pass
+
 
     # define single instance (singleton)
     _instance = None
@@ -38,16 +71,13 @@ class Executor(abc.ABC):
             Executor._instance = super().__new__(cls)
         return Executor._instance
 
-    def __init__(self, func, method, filename, procs=1, timeout=None):
+    def __init__(self, data, filename, procs=1, timeout=None):
+    # def __init__(self, func, method, filename, procs=1, timeout=None):
 
         # verify if submit file exists
         if not os.path.isfile(filename):
             logger.error('file "{}" not found, exiting.'.format(filename))
             sys.exit(1)
-
-        if method == drm.HTCONDOR:
-            # get the scheduler
-            self._schedd = htcondor.Schedd()
 
         # get the submit file for the darwin application
         self._submitf = configparser.ConfigParser()
@@ -56,17 +86,15 @@ class Executor(abc.ABC):
         if 'arguments' in self._submitf['htcondor']:
             del self._submitf['htcondor']['arguments']
 
-        if 'initialdir' in self._submitf['htcondor']:
-            del self._submitf['htcondor']['initialdir']
-            self._submitf['htcondor']['initialdir'] = os.getcwd()
-
+        # create path object to handle multiple paths and
         # define the root dir and the opt dir
+        self._paths = Executor.PathHandler()
         self._root_dir = os.getcwd()
         self._opt_dir = self._root_dir
         self._opt_dir_name = ''
 
         # save the func to be executed
-        self._func = func
+        self._func = data.func
 
         # create the dictionary responsible to hold all registered searchspaces
         self._jobs = collections.deque()
@@ -80,9 +108,6 @@ class Executor(abc.ABC):
 
         # stretegy reference
         self._strategy = None
-
-        # save executor
-        self._method = method
 
         self._job_ref = {}
 

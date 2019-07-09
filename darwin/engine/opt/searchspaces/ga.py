@@ -10,21 +10,18 @@ logger = logging.getLogger(__name__)
 
 class Ga(Searchspace):
 
-    def __init__(self, mutation_probability=None):
+    def __init__(self, data):
 
         # call super from searchspace base class
         super().__init__(opt.GA)
 
-        if mutation_probability == None:
-            logger.error('GA searchspace requires a mutation\
-                    probability value to work')
-            sys.exit(1)
+        required = ('mutation_probability',)
+        data.hasrequired(required)
 
         # GA
         self._pReproduction = 0.0 # probability of reproduction
-        self._pMutation = mutation_probability # probability of mutation
+        self._pMutation = data.mutation_probability # probability of mutation
         self._pCrossover = 0.0 # probability of crossover
-
 
     @property
     def pMutation(self):

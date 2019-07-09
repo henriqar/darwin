@@ -120,7 +120,6 @@ class Agent(abc.ABC):
         # register the executor used
         self._executor = executor
 
-    # def evaluate(self, func, maps):
     def schedule(self):
 
         # set the intermediate before executing
@@ -128,9 +127,7 @@ class Agent(abc.ABC):
 
         args = {}
         for i in self._n:
-        # for i in range(self._n):
             k, v = self._pspace[i]
-            # k, v = self._maps[i]
-            args[k] = v[self._x[i]] if v.discrete else self._x[i]
+            args[k] = v.format(self._x[i]) if v.discrete else self._x[i]
 
         self._executor.register_job(self, args)

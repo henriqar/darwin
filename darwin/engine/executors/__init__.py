@@ -5,7 +5,10 @@ from .executor import Executor
 
 from darwin._constants import drm
 
-def factory(name, *args, **kwargs):
+def factory(*args, **kwargs):
+
+    data = args[0]
+    name = data.executor
 
     try:
 

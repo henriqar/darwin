@@ -105,3 +105,4 @@ venv.bak/
 
 # darwin log
 darwin.log
+darwin.opt/

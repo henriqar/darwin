@@ -60,10 +60,7 @@ class Paramspace:
         if isinstance(param, tuple):
 
             # create map
-            if formatter is not None:
-                m = Map(param, discrete, formatter=formatter)
-            else:
-                m = Map(param, discrete)
+            m = Map(param, discrete, formatter)
 
             # force mapparam to be tuple, not modifyable
             self._params[self._param_id] = (name, m)
@@ -132,15 +129,14 @@ class Paramspace:
         sumw = sum(self._wt)
         self._wp = tuple(map(lambda i: i/sumw, self._wt))
 
-    def create_searchspaces(self, opt_alg, kwargs):
+    def create_searchspaces(self, data):
 
         # create a list of searchspaces basd on the parameters found
         searchspaces = []
         for params in self._pt:
 
             # searchspace aux
-            spaux = sp.factory(opt_alg, **kwargs)
-            # spaux = spfactory.create_searchspace(opt_alg, kwargs)
+            spaux = sp.factory(data.optimization, data)
             spaux.n = params
             spaux.set_paramspace(self)
 
@@ -195,36 +191,3 @@ class Paramspace:
 
         return ''.join(string)
 
-    def random_uniform(self):
-
-        # create dict to hold parameters
-        pdict = {}
-
-        # choose one of the possibilities
-        choosen = np.random.choice(self._pt, p=self._wp)
-
-        # get item and randomize arguments inside
-        for param in choosen:
-            name, tup = self._params[param]
-            pdict[name] =  np.random.choice(tup)
-
-        # return read-only dict for user
-        return MappingProxyType(pdict)
-
-    def random_gaussian(self):
-
-        # create dict to hold parameters
-        pdict = {}
-
-
-        # return read-only dict for user
-        return MappingProxyType(pdict)
-
-    def random_cauchy(self):
-
-        # create dict to hold parameters
-        pdict = {}
-
-
-        # return read-only dict for user
-        return MappingProxyType(pdict)

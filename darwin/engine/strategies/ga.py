@@ -26,11 +26,6 @@ def info_output(iteration, max_itrs, fitness, elapsed_time):
 class Ga(Strategy):
 
     def initializer(self, searchspace):
-
-        # extract darwin parametrs from dict
-        m = searchspace.m
-        n = searchspace.n
-
         searchspace.schedule()
 
     def execute_step(self, searchspace):
@@ -41,7 +36,7 @@ class Ga(Strategy):
         # extract darwin parametrs from dict
         m = searchspace.m
         n = searchspace.n
-        max_itrs = self._max_itrs
+        max_itrs = self._data.iterations
 
         tmp = [dict.fromkeys(n, 0) for i in range(m)]
 
@@ -49,8 +44,6 @@ class Ga(Strategy):
         header_output('Iteration', 'fitness', 'elapsed')
 
         for t in range(max_itrs):
-
-            # print(' Exec generation {0: >6}/{1:}:'.format(t+1, max_itrs))
 
             for i in range(m):
 
@@ -62,7 +55,6 @@ class Ga(Strategy):
 
                     crossover_index = np.random.uniform(0, m)
                     for k in n:
-                    # for k in range(n):
 
                         if k < crossover_index:
                             tmp[p][k] = searchspace.a[selection[p]].x[k]
@@ -73,14 +65,10 @@ class Ga(Strategy):
 
                 if m % 2 == 0:
 
-                    # crossover_index = np.random.uniform(0, n)
                     crossover_index = np.random.uniform(0, len(n))
 
-                    # for k in n:
                     for idx, k in enumerate(n):
-                    # for k in range(n):
 
-                        # if k < crossover_index:
                         if idx < crossover_index:
                             tmp[m-1][k] = searchspace.a[selection[m-1]].x[k]
                         else:
@@ -92,17 +80,14 @@ class Ga(Strategy):
                     if np.random.uniform(0, 1) <= searchspace.pMutation:
 
                         mutation_index = np.random.randint(0, len(n))
-                        # import pdb; pdb.set_trace()
                         _, v = maps[mutation_index]
                         tmp[i][mutation_index] = v.uniform_random_element()
 
                 # changes the generation
                 for j in range(m):
                     for k in n:
-                    # for k in range(n):
                         searchspace.a[j].x[k] = tmp[j][k]
 
-            # searchspace.schedule(func, maps)
             searchspace.schedule()
 
             # get the time elapsed

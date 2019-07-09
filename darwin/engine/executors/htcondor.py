@@ -37,6 +37,14 @@ class Htcondor(Executor):
     _JOB_TRANSFERING_OUTPUT = 5
     _JOB_SUSPENDED = 6
 
+    def __init__(self, data, filename, procs=1, timeout=None):
+
+        # call super constructor
+        super().__init__(data, filename, procs=procs, timeout=timeout)
+
+        # get the scheduler
+        self._schedd = htcondor.Schedd()
+
     def _prepare_job_args(self):
         pass
 

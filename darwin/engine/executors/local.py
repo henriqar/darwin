@@ -25,20 +25,6 @@ def agent_dir(child):
     finally:
         os.chdir(parent_dir)
 
-# def func_wrapper(func, merged_args):
-
-#     # get all argumetns used
-#     rootdir, agentid, kwargs = merged_args
-
-#     # lets create the dir to execute the agent and change the thread to
-#     # work within this dir
-#     agentdir = os.path.join(rootdir, agentid)
-#     os.makedirs(agentdir)
-#     os.cwd(agentdir)
-
-#     # call the func
-#     func(**kwargs)
-
 logger = logging.getLogger(__name__)
 
 class Local(Executor):

@@ -6,7 +6,9 @@ from .strategy import Strategy
 
 from darwin._constants import opt
 
-def factory(name, *args, **kwargs):
+def factory(*args, **kwargs):
+
+    name = args[0].optimization
 
     try:
 

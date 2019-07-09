@@ -15,7 +15,8 @@ class _Constants:
 drm = _Constants()
 opt = _Constants()
 
-drm.LOCAL = 'LOCAL'
+drm.LOCAL = 'LOCAL'        # TODO
+drm.SEQ_LOCAL = 'SEQ_LOCO' # TODO
 drm.HTCONDOR = 'HTCONDOR'
 
 opt.ABC = 'ABC'

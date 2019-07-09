@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from setuptools import setup, find_packages, Extension
+from setuptools import setup, find_packages
 from distutils.util import convert_path
 
 # get version information
