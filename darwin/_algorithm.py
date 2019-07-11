@@ -159,8 +159,8 @@ class Algorithm():
         elapsed_time = time.time() - start_time
         print('\nTotal optimization time: ', datetime.timedelta(
             seconds=elapsed_time))
-        logger.info('\nTotal optimization time: ', datetime.timedelta(
-            seconds=elapsed_time))
+        logger.info('\nTotal optimization time: {}'.format(datetime.timedelta(
+            seconds=elapsed_time)))
 
     def print_data(self):
 
@@ -168,7 +168,8 @@ class Algorithm():
         print('darwin v{}\n'.format(__version__))
 
         print('Opt algorithm chosen -> ', self._data.optimization)
-        logger.info('Opt algorithm chosen -> ', self._data.optimization)
+        logger.info('Opt algorithm chosen -> {}'.format(
+            self._data.optimization))
 
         print('DRM engine chosen -> {}'.format(self._data.executor))
         logger.info('DRM engine chosen -> {}'.format(self._data.executor))

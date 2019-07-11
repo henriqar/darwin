@@ -6,6 +6,9 @@
 
 [darwin]
 
+#executable=/bin/sleep
+executable=cos_cos
+
 # (TODO)
 # define the collector from htcondor to use
 collector=lsc.ic.unicamp.br
@@ -29,9 +32,6 @@ exec_time=6
 # although the user shoukld take care of defining the directoires
 # and how the program work
 [htcondor]
-
-#executable=/bin/sleep
-executable=darwin.opt/cos_cos
 
 universe=vanilla
 

@@ -10,19 +10,8 @@ import sys
 import time
 
 from configparser import NoSectionError, NoOptionError
-from contextlib import contextmanager
 
 from . import Executor
-
-@contextmanager
-def agent_dir(child):
-
-    parent_dir = os.getcwd()
-    try:
-        os.chdir(child)
-        yield child
-    finally:
-        os.chdir(parent_dir)
 
 logger = logging.getLogger(__name__)
 
@@ -37,31 +26,17 @@ class Htcondor(Executor):
     _JOB_TRANSFERING_OUTPUT = 5
     _JOB_SUSPENDED = 6
 
-    # def __init__(self, data, filename, procs=1, timeout=None):
+    def __init__(self, data, filename, procs=1, timeout=None):
 
-    #     # call super constructor
-    #     super().__init__(data, filename, procs=procs, timeout=timeout)
+        # call super constructor
+        super().__init__(data, filename, procs=procs, timeout=timeout)
 
-    #     # get the scheduler
-    #     self._schedd = htcondor.Schedd()
-
-    # def _evaluate(self, jobdict):
-
-    #     for clusterid, v in jobdict.items():
-
-    #         agent_ref, ads, agent_dir_name = v
-    #         with agent_dir(os.path.join(curr_dir, agent_dir_name)) as child:
-
-    #             # call retrieve ads from htcondor in this directory
-    #             # self._schedd.retrieve("ClusterId == %d".format(clusterid))
-
-    #             # call function to extract fitness value from execution
-    #             agent_ref.intermediate = self._func()
-
-    #             if agent_ref.intermediate < 0:
-    #                 logger.error('negative fitness value found: {}'.format(
-    #                     agent_ref.intermediate))
-    #                 sys.exit(1)
+        try:
+            self._refresh_rate = int(self._submitf['darwin']['refresh_rate'])
+        except (KeyError, NoSectionError, NoOptionError) as e:
+            # default refresh in seconds
+            self._refresh_rate = 60
+            logging.warning('refresh_rate not find, fallback to default: 60s')
 
     def _execute(self, handler):
 
@@ -70,7 +45,7 @@ class Htcondor(Executor):
         # config parser handler
         conf = self._submitf
 
-        # secure the joib id from condor
+        # secure the job id from condor
         ids = []
 
         length = len(self._jobs)
@@ -78,6 +53,10 @@ class Htcondor(Executor):
 
             # pop value and get args for it
             arg = self._jobs.popleft()
+
+            executable = conf['darwin']['executable']
+            conf['htcondor']['executable'] = os.path.join(handler.optdirpath,
+                    executable)
 
             arguments = ' '.join('-%s %s' % tup for tup in arg.items())
             conf['htcondor']['arguments'] = arguments
@@ -88,17 +67,9 @@ class Htcondor(Executor):
 
             with schedd.transaction() as txn:
                 ads = []
-                # clusterid = sub.queue(txn)
                 clusterid = sub.queue(txn, ad_results=ads)
                 ids.append(clusterid)
-                # jobdict.append(clusterid] = (ads)
                 # self._schedd.spool(ads)
-
-        try:
-            refresh_rate = int(conf['darwin']['refresh_rate'])
-        except (NoSectionError, NoOptionError) as e:
-            # default refresh in seconds
-            refresh_rate = 60
 
         req = ' || '.join('(ClusterId == {})'.format(id) for id in ids)
         finished = False
@@ -115,7 +86,7 @@ class Htcondor(Executor):
                 finished = True
             else:
                 # wait to probe condor again
-                time.sleep(refresh_rate)
+                time.sleep(self._refresh_rate)
 
     #             # call retrieve ads from htcondor in this directory
     #             # self._schedd.retrieve("ClusterId == %d".format(clusterid))

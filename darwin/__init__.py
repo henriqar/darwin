@@ -8,10 +8,8 @@ from ._constants import drm
 from ._constants import opt
 
 
-logger = logging.getLogger(__name__)
-
-# set log level
-logger.setLevel(logging.WARNING)
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
 
 # instantiate and create the project logger
 _cmd = logging.StreamHandler()

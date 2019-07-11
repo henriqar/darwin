@@ -97,7 +97,7 @@ class Executor(abc.ABC):
 
         @property
         def iterationpath(self):
-            return os.path.join(self._execdir, str(self._iteration))
+            return os.path.join(self._execdir, 'iteration_' + str(self._iteration))
 
         @property
         def agentpathlist(self):
@@ -109,9 +109,7 @@ class Executor(abc.ABC):
             # get all agent paths, create folders and symbolic link to
             # original files
             for agentpath in self.agentpathlist:
-                # os.makedirs(agentpath)
                 copyas(self._optdir, agentpath)
-                logger.info('created agent dir "{}"'.format(agentpath))
 
             return self
 
@@ -199,6 +197,7 @@ class Executor(abc.ABC):
                 os.path.isdir(handler.execdirpath):
             shutil.rmtree(handler.execdirpath, ignore_errors=True)
 
+        handler.iteration = 'inital'
         with handler:
             print('Evaluating random initialization of searchspace\n')
             self._execute(handler)
