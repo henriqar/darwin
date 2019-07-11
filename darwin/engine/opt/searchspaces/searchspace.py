@@ -134,9 +134,11 @@ class Searchspace(abc.ABC):
         print('Search space with {} agents and {} decision variables'\
                 .format(self._m, self._n))
 
-    @abc.abstractmethod
     def schedule(self):
-        raise NotImplementedError()
+
+        # send evaluations to execution engine
+        for i in range(self.m):
+            self.a[i].schedule()
 
     @abc.abstractmethod
     def update(self):

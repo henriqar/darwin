@@ -1,67 +1,139 @@
 
 import abc
-import collections
 import configparser
 import contextlib
+import collections
 import htcondor
 import logging
 import os
 import shutil
 import sys
 import time
+import shutil
 
 from darwin._constants import drm
 
+@contextlib.contextmanager
+def agentwd(child):
+
+    parent_dir = os.getcwd()
+    try:
+        os.chdir(child)
+        yield child
+    finally:
+        os.chdir(parent_dir)
+
 logger = logging.getLogger(__name__)
+
+def copyas(src, dst):
+    if not os.path.isabs(src):
+        raise RuntimeError('src is not an abs path')
+    names = os.listdir(src)
+    os.makedirs(dst)
+    errors = []
+    for name in names:
+        srcname = os.path.join(src, name)
+        dstname = os.path.join(dst, name)
+        try:
+            if os.path.islink(srcname):
+                linkto = os.readlink(srcname)
+                os.symlink(linkto, dstname)
+            elif os.path.isdir(srcname):
+                copyas(srcname, dstname)
+            else:
+                os.symlink(srcname, dstname)
+        except OSError as why:
+            errors.append((srcname, dstname, str(why)))
+        except Error as why:
+            errors.extend(err.args[0])
+    try:
+        shutil.copystat(src, dst)
+    except OSError as  why:
+        if why.winerror is None:
+            errors.extend((src, dst, str(why)))
+    if errors:
+        raise Error(errors)
+
 
 class Executor(abc.ABC):
 
-    class PathHandler(contextlib.ContextDecorator):
+    class ContextHandler():
 
-        def __init__(self, env='darwin.opt'):
+        def __init__(self, func, searchspace, optdir='darwin.opt', env='darwin.exec'):
 
-            # imutable parameters in life cycle
             self._root = os.getcwd()
-            self._darwin = os.path.join(self._root, env)
+            self._execdir = os.path.join(self._root, env)
+            self._optdir = os.path.join(self._root, optdir)
 
-            if os.path.exists(self._darwin) and os.path.isdir(self._darwin):
-                # remove dir and create a new one
-                shutil.rmtree(self._darwin, ignore_errors=True)
+            self._iteration = os.path.join(self._execdir, 'iteration_initial')
 
-            # mutable parameters
-            self._iteration = ''
-            self._agent = ''
+            data = []
+            for idx in range(searchspace.m):
+                data.append('agent_{}'.format(idx))
+            self._agents = tuple(data)
+
+            self._searchspace = searchspace
+            self._func = func
 
         @property
-        def root(self):
+        def rootpath(self):
             return self._root
 
         @property
-        def darwin(self):
-            return self._darwin
+        def execdirpath(self):
+            return self._execdir
 
+        @property
+        def optdirpath(self):
+            return self._optdir
+
+        @property
+        def iteration(self):
+            return self._iteration
+
+        @iteration.setter
         def iteration(self, it):
-            return os.path.join(self._darwin, self._iteration + str(it))
+            self._iteration = it
 
-        def agent(self, agt):
-            return os.path.join(self._darwin, self._agent + str(agt))
+        @property
+        def iterationpath(self):
+            return os.path.join(self._execdir, str(self._iteration))
 
-        def _update(self):
-
-            self._darwin = os.path.join(self._root, env)
-
-            if os.path.exists(self._opt_dir) and os.path.isdir(self._opt_dir):
-                # remove dir and create a new one
-                shutil.rmtree(self._opt_dir, ignore_errors=True)
-
-            os.makedirs(self._opt_dir)
+        @property
+        def agentpathlist(self):
+            itpath = self.iterationpath
+            return tuple(os.path.join(itpath, agent) for agent in self._agents)
 
         def __enter__(self):
+
+            # get all agent paths, create folders and symbolic link to
+            # original files
+            for agentpath in self.agentpathlist:
+                # os.makedirs(agentpath)
+                copyas(self._optdir, agentpath)
+                logger.info('created agent dir "{}"'.format(agentpath))
+
             return self
 
         def __exit__(self, *exec_details):
-            pass
 
+            # execute all agents evaluation
+            for idx, agentdir in enumerate(self.agentpathlist):
+                logger.info('changed to wd "{}"'.format(agentdir))
+                os.chdir(agentdir)
+                instantfit = self._func()
+                if instantfit < 0:
+                    logger.error('negative fitness value found: {}'.format(
+                        instantfit))
+                    sys.exit(1)
+
+                logger.info('iter: {} agent: {} fit: {} dir: {}'.format(
+                    self.iteration, idx, instantfit, agentdir))
+                self._searchspace.a[idx].fit = instantfit
+
+            # on exit return to root folder
+            os.chdir(self._root)
+            self._searchspace.update()
 
     # define single instance (singleton)
     _instance = None
@@ -72,7 +144,6 @@ class Executor(abc.ABC):
         return Executor._instance
 
     def __init__(self, data, filename, procs=1, timeout=None):
-    # def __init__(self, func, method, filename, procs=1, timeout=None):
 
         # verify if submit file exists
         if not os.path.isfile(filename):
@@ -83,25 +154,11 @@ class Executor(abc.ABC):
         self._submitf = configparser.ConfigParser()
         self._submitf.read(filename)
 
-        if 'arguments' in self._submitf['htcondor']:
-            del self._submitf['htcondor']['arguments']
-
-        # create path object to handle multiple paths and
-        # define the root dir and the opt dir
-        self._paths = Executor.PathHandler()
-        self._root_dir = os.getcwd()
-        self._opt_dir = self._root_dir
-        self._opt_dir_name = ''
-
         # save the func to be executed
         self._func = data.func
 
         # create the dictionary responsible to hold all registered searchspaces
         self._jobs = collections.deque()
-
-        # create a threadpool for local execution with max_workreers as
-        # set by the user
-        self._workers = procs
 
         # save timeout for job
         self._timeout = timeout
@@ -109,92 +166,56 @@ class Executor(abc.ABC):
         # stretegy reference
         self._strategy = None
 
-        self._job_ref = {}
 
     def register_strategy(self, strategy):
         self._strategy = strategy
 
-    def register_job(self, agent_ref, job):
-        self._jobs.append((agent_ref, job))
-
-    def _verify_submit_file(self):
-        pass
+    def register_job(self, job):
+        self._jobs.append(job)
 
     @abc.abstractmethod
-    def _prepare_job_args(self):
+    def _execute(self, handler):
         raise NotImplementedError
 
-    @abc.abstractmethod
-    def _evaluate(self, curr_dir):
-        raise NotImplementedError
-
-    @abc.abstractmethod
-    def _execute(self, curr_dir):
-        raise NotImplementedError
-
-    @abc.abstractmethod
-    def _wait(self):
-        raise NotImplementedError
-
-    def _create_environment(self, env='darwin.opt'):
-
-        self._opt_dir = os.path.join(self._root_dir, env)
-        self._opt_dir_name = env
-
-        if os.path.exists(self._opt_dir) and os.path.isdir(self._opt_dir):
-            # remove dir and create a new one
-            shutil.rmtree(self._opt_dir, ignore_errors=True)
-
-        os.makedirs(self._opt_dir)
-
-    def execute(self, searchspaces):
-
-        # create the opt dir and prepare the submit file
-        self._prepare_job_args()
-        self._create_environment()
+    def execute(self, searchspace):
 
         # register executor for every agent
-        generators = []
-        for sp in searchspaces:
-            sp.register_executor(self)
-            self._strategy.initializer(sp)
+        searchspace.register_executor(self)
+        self._strategy.initializer(searchspace)
 
-            # create all generators used inside the excution process
-            generators.append(self._strategy.execute_step(sp))
+        # create all generators used inside the excution process
+        generator = self._strategy.step(searchspace)
 
-        print('Evaluating random initialization of searchspace\n')
-        iteration = 0
+        # create path object to handle multiple paths
+        handler = Executor.ContextHandler(self._func, searchspace)
 
+        if not os.path.exists(handler.optdirpath):
+            logger.error('an optdir containing all optimization files must be',
+                    ' provided')
+            sys.exit(1)
+
+        # create the opt dir and prepare the submit file
+        if os.path.exists(handler.execdirpath) and \
+                os.path.isdir(handler.execdirpath):
+            shutil.rmtree(handler.execdirpath, ignore_errors=True)
+
+        with handler:
+            print('Evaluating random initialization of searchspace\n')
+            self._execute(handler)
+
+        # iteration = 0
         finished = False
         while not finished:
 
-            #create iteration dir inside opt dir
-            curr_dir = os.path.join(self._opt_dir, 'iter_' + str(iteration))
-            os.makedirs(curr_dir)
-
-            # execute choosen method (local or cluster)
-            self._execute(curr_dir)
-
-            # wait for execution if needed (cluster exec will block here until
-            # the results are ready to be collected)
-            self._wait()
-
-            # get the results and generate each fitnes in each folder
-            # for every agent in every iteration
-            self._evaluate(curr_dir)
-
-            # update searchspaces
-            for sp in searchspaces:
-                sp.update()
-
-            iteration += 1
-
             try:
-                for gen in generators:
-                    next(gen)
+                handler.iteration = next(generator)
             except StopIteration:
-                searchspaces[0].global_fitness()
+                searchspace.global_fitness()
                 finished = True
+            else:
+                with handler:
+                    self._execute(handler)
+
 
 
 

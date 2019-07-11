@@ -31,7 +31,7 @@ exec_time=6
 [htcondor]
 
 #executable=/bin/sleep
-executable=cos_cos
+executable=darwin.opt/cos_cos
 
 universe=vanilla
 

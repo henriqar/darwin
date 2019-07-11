@@ -10,7 +10,7 @@ class Strategy(abc.ABC):
         self._pspace = pspace
 
     @abc.abstractmethod
-    def execute_step(self):
+    def step(self):
        raise NotImplementedError
 
 

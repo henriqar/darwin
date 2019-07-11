@@ -15,9 +15,6 @@ class Agent(abc.ABC):
         # common definitions
         self._n = n
 
-        # set the intermediate result for each simulation
-        self._intermediate = sys.maxsize
-
         self._x = [] # position
         # for i in range(n):
         #     self._x.append(0)
@@ -81,7 +78,12 @@ class Agent(abc.ABC):
 
     @fit.setter
     def fit(self, fit):
+        self._pfit = self._fit
         self._fit = fit
+
+    @property
+    def pfit(self):
+        return self._pfit
 
     @property
     def t(self):
@@ -130,4 +132,4 @@ class Agent(abc.ABC):
             k, v = self._pspace[i]
             args[k] = v.format(self._x[i]) if v.discrete else self._x[i]
 
-        self._executor.register_job(self, args)
+        self._executor.register_job(args)

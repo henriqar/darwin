@@ -40,21 +40,9 @@ class Ga(Searchspace):
                 print('x[{}]: {}   '.format(j, fit), end='')
             print('fitness value: {}'.format(self._a[i].fit))
 
-    def schedule(self):
-
-        # send evaluations to execution engine
-        for i in range(self.m):
-            self.a[i].schedule()
-
     def update(self):
 
         for i in range(self.m):
-
-            # get the intermediate value of the simulation
-            fitness = self.a[i].intermediate
-
-            if fitness < self.a[i].fit:
-                self.a[i].fit = fitness
 
             if self.a[i].fit < self._gfit:
 

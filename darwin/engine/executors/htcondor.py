@@ -37,71 +37,62 @@ class Htcondor(Executor):
     _JOB_TRANSFERING_OUTPUT = 5
     _JOB_SUSPENDED = 6
 
-    def __init__(self, data, filename, procs=1, timeout=None):
+    # def __init__(self, data, filename, procs=1, timeout=None):
 
-        # call super constructor
-        super().__init__(data, filename, procs=procs, timeout=timeout)
+    #     # call super constructor
+    #     super().__init__(data, filename, procs=procs, timeout=timeout)
 
-        # get the scheduler
-        self._schedd = htcondor.Schedd()
+    #     # get the scheduler
+    #     self._schedd = htcondor.Schedd()
 
-    def _prepare_job_args(self):
-        pass
+    # def _evaluate(self, jobdict):
 
-    def _evaluate(self, curr_dir):
+    #     for clusterid, v in jobdict.items():
 
-        for clusterid, v in self._job_ref.items():
+    #         agent_ref, ads, agent_dir_name = v
+    #         with agent_dir(os.path.join(curr_dir, agent_dir_name)) as child:
 
-            agent_ref, ads, agent_dir_name = v
-            with agent_dir(os.path.join(curr_dir, agent_dir_name)) as child:
+    #             # call retrieve ads from htcondor in this directory
+    #             # self._schedd.retrieve("ClusterId == %d".format(clusterid))
 
-                # call retrieve ads from htcondor in this directory
-                # self._schedd.retrieve("ClusterId == %d".format(clusterid))
+    #             # call function to extract fitness value from execution
+    #             agent_ref.intermediate = self._func()
 
-                # call function to extract fitness value from execution
-                agent_ref.intermediate = self._func()
+    #             if agent_ref.intermediate < 0:
+    #                 logger.error('negative fitness value found: {}'.format(
+    #                     agent_ref.intermediate))
+    #                 sys.exit(1)
 
-                if agent_ref.intermediate < 0:
-                    logger.error('negative fitness value found: {}'.format(
-                        agent_ref.intermediate))
-                    sys.exit(1)
+    def _execute(self, handler):
 
-    def _execute(self, curr_dir):
-
-        # secure the joib id from condor
-        self._job_ref = {}
-
-        index = 0
-        while self._jobs:
-
-            # pop value and get agent ref and args for it
-            agent, arg = self._jobs.pop()
-
-            arguments = ' '.join('-%s %s' % tup for tup in arg.items())
-            self._submitf['htcondor']['arguments'] = arguments
-
-            agent_dir_name = 'agent_' + str(index)
-            agent_dir = os.path.join(curr_dir, agent_dir_name)
-            os.makedirs(agent_dir)
-            self._submitf['htcondor']['initialdir'] = agent_dir
-
-            # get redirect of htcondor submit file to a dict
-            sub = htcondor.Submit(dict(self._submitf.items('htcondor')))
-
-            with self._schedd.transaction() as txn:
-                ads = []
-                clusterid = sub.queue(txn)
-                # clusterid = sub.queue(txn, ad_results=ads)
-                self._job_ref[clusterid] = (agent, ads, agent_dir_name)
-                # self._schedd.spool(ads)
-
-            # increment index
-            index += 1
-
-    def _wait(self):
+        schedd = htcondor.Schedd()
 
         # config parser handler
         conf = self._submitf
+
+        # secure the joib id from condor
+        ids = []
+
+        length = len(self._jobs)
+        for idx in range(length):
+
+            # pop value and get args for it
+            arg = self._jobs.popleft()
+
+            arguments = ' '.join('-%s %s' % tup for tup in arg.items())
+            conf['htcondor']['arguments'] = arguments
+            conf['htcondor']['initialdir'] = handler.agentpathlist[idx]
+
+            # get redirect of htcondor submit file to a dict
+            sub = htcondor.Submit(dict(conf.items('htcondor')))
+
+            with schedd.transaction() as txn:
+                ads = []
+                # clusterid = sub.queue(txn)
+                clusterid = sub.queue(txn, ad_results=ads)
+                ids.append(clusterid)
+                # jobdict.append(clusterid] = (ads)
+                # self._schedd.spool(ads)
 
         try:
             refresh_rate = int(conf['darwin']['refresh_rate'])
@@ -109,24 +100,23 @@ class Htcondor(Executor):
             # default refresh in seconds
             refresh_rate = 60
 
-        it = iter(self._job_ref.keys())
-        req_string = '(ClusterId == {})'.format(next(it))
-        for i in it:
-            req_string += ' || (ClusterId == {})'.format(i)
-
+        req = ' || '.join('(ClusterId == {})'.format(id) for id in ids)
         finished = False
         while not finished:
 
             # query schedd for all job procs
-            query = self._schedd.xquery(
-                    requirements=req_string,
-                    projection=['ProcId', 'ClusterId', 'JobStatus'])
+            query = schedd.xquery(
+                    requirements=req,
+                    projection=['ClusterId', 'JobStatus'])
 
             try:
                 data = next(query)
             except StopIteration:
                 finished = True
+            else:
+                # wait to probe condor again
+                time.sleep(refresh_rate)
 
-            # wait to probe condor again
-            time.sleep(refresh_rate)
+    #             # call retrieve ads from htcondor in this directory
+    #             # self._schedd.retrieve("ClusterId == %d".format(clusterid))
 

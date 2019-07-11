@@ -28,7 +28,7 @@ class Ga(Strategy):
     def initializer(self, searchspace):
         searchspace.schedule()
 
-    def execute_step(self, searchspace):
+    def step(self, searchspace):
 
         # get the pmappings through the sungleton paramsapce
         maps = self._pspace

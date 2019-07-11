@@ -154,7 +154,7 @@ class Algorithm():
 
         start_time = time.time()
 
-        executor.execute(searchspaces)
+        executor.execute(searchspaces[0])
 
         elapsed_time = time.time() - start_time
         print('\nTotal optimization time: ', datetime.timedelta(
