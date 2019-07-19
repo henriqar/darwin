@@ -19,12 +19,27 @@ class Map(tuple):
             inst._discrete = discrete
 
             if formatter is None:
-                logger.info('map formatter did not set, fallback to default')
+                logger.info('map formatter not set, fallback to default')
                 inst._formatter = DefaultFormatter()
             else:
                 inst._formatter = formatter
 
             return inst
+
+    def __copy__(self):
+        cls = self.__class__
+        newone = cls.__new__(cls, self, self._discrete, self._formatter)
+        newone.__dict__.update(self.__dict__)
+        return newone
+
+    def __deepcopy__(self, memo):
+        cls = self.__class__
+        newone = cls.__new__(cls, self, self._discrete, self._formatter)
+        newone.__dict__.update(self.__dict__)
+        memo[id(newone)] = newone
+        for k,v in self.__dict__.items():
+            setattr(newone, k, copy.deepcopy(v, memo))
+        return newone
 
     @property
     def lb(self):
@@ -61,7 +76,7 @@ class Map(tuple):
 
     def cauchy_random_element(self):
         if self._discrete:
-            return np.random.standard_cauchy(0, len(self))
+            return round(np.random.standard_cauchy(0, len(self)))
         else:
             return np.random.standard_cauchy(self[0], self[-1])
 

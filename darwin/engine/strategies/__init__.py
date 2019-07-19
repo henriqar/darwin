@@ -1,33 +1,24 @@
 
+import re
 
 from importlib import import_module
 
 from .strategy import Strategy
 
-from darwin._constants import opt
-
-def factory(*args, **kwargs):
-
-    name = args[0].optimization
+def factory(optm, *args, **kwargs):
 
     try:
+        regex = r'[A-Z][^A-Z]*'
+        module = '_'.join([x.lower() for x in re.findall(regex, optm)])
 
-        if not hasattr(opt, name):
-            raise ValueError('unexpected strategy value "{}"'.format(name))
-        else:
-            module_name = name.lower()
-            class_name = name.lower().capitalize()
+        exec_ = import_module('.' + module, package='darwin.engine.strategies')
+        class_ = getattr(exec_, optm)
 
-        strategy_module = import_module('.' + module_name,
-                package='darwin.engine.strategies')
-        strategy_class = getattr(strategy_module, class_name)
-
-        instance = strategy_class(*args, **kwargs)
-
+        instance = class_(*args, **kwargs)
     except (AttributeError, ImportError):
-        raise ImportError('{} is not a child of strategy'. format(name))
+        raise ImportError('{} is not a child of strategy'. format(optm))
     else:
-        if not issubclass(strategy_class, Strategy):
+        if not issubclass(class_, Strategy):
             raise ImportError('there is no {} strategy implemented')
 
     return instance

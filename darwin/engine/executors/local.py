@@ -28,13 +28,8 @@ def agent_dir(child):
 logger = logging.getLogger(__name__)
 
 class Local(Executor):
-    def _prepare_job_args(self):
-        raise NotImplementedError
 
-    def _evaluate(self, curr_dir):
-        raise NotImplementedError
-
-    def _execute(self, curr_dir):
+    def _core_optimization(self, handler, particles):
 
         if self._workers > 1:
             logger.error('local parallel not supported yet')

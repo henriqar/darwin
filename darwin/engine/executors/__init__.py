@@ -3,31 +3,18 @@ from importlib import import_module
 
 from .executor import Executor
 
-from darwin._constants import drm
-
-def factory(*args, **kwargs):
-
-    data = args[0]
-    name = data.executor
+def factory(execname, *args, **kwargs):
 
     try:
+        module = execname.lower()
+        exec_ = import_module('.' + module, package='darwin.engine.executors')
+        class_ = getattr(exec_, execname)
 
-        if not hasattr(drm, name):
-            raise ValueError('unexpected executor value "{}"'.format(name))
-        else:
-            module_name = name.lower()
-            class_name = name.lower().capitalize()
-
-        executor_module = import_module('.' + module_name,
-                package='darwin.engine.executors')
-        executor_class = getattr(executor_module, class_name)
-
-        instance = executor_class(*args, **kwargs)
-
+        instance = class_(*args, **kwargs)
     except (AttributeError, ImportError):
-        raise ImportError('{} is not a child of executor'. format(name))
+        raise ImportError('{} is not a child of executor'. format(execname))
     else:
-        if not issubclass(executor_class, Executor):
+        if not issubclass(class_, Executor):
             raise ImportError('there is no {} executor implemented')
 
     return instance

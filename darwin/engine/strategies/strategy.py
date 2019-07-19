@@ -1,16 +1,19 @@
 
 import abc
+import logging
 
-class Strategy(abc.ABC):
+logger = logging.getLogger(__name__)
 
-    def __init__(self, data, pspace):
+class Strategy():
 
-        # get the darwin param dict and the kwargs dict
-        self._data = data
-        self._pspace = pspace
+    def __init__(self, data):
+        self.data = data
 
     @abc.abstractmethod
-    def step(self):
-       raise NotImplementedError
+    def initialize(self, particles):
+        raise NotImplementedError
 
+    @abc.abstractmethod
+    def generator(self, particles):
+       raise NotImplementedError
 

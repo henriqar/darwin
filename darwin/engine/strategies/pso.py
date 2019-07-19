@@ -23,7 +23,7 @@ def info_output(iteration, max_itrs, fitness, elapsed_time):
     print(' {:<13d} {:<20f} {:<25s}'.format(
         iteration, fitness, str(elapsed_time)))
 
-class Ga(Strategy):
+class Pso(Strategy):
 
     def initializer(self, searchspace):
         searchspace.schedule()
@@ -44,49 +44,10 @@ class Ga(Strategy):
         header_output('Iteration', 'fitness', 'elapsed')
 
         for t in range(max_itrs):
-
             for i in range(m):
-
-		# It performs the selectione
-                selection = RouletteSelectionGA(searchspace.a, m)
-
-                # perform the crossover
-                for p in range(0, math.floor(m/2), 2):
-
-                    crossover_index = np.random.uniform(0, m)
-                    for k in n:
-
-                        if k < crossover_index:
-                            tmp[p][k] = searchspace.a[selection[p]].x[k]
-                            tmp[p+1][k] = searchspace.a[selection[p+1]].x[k]
-                        else:
-                            tmp[p][k] = searchspace.a[selection[p+1]].x[k]
-                            tmp[p+1][k] = searchspace.a[selection[p]].x[k]
-
-                if m % 2 == 0:
-
-                    crossover_index = np.random.uniform(0, len(n))
-
-                    for idx, k in enumerate(n):
-
-                        if idx < crossover_index:
-                            tmp[m-1][k] = searchspace.a[selection[m-1]].x[k]
-                        else:
-                            tmp[m-1][k] = searchspace.a[selection[0]].x[k]
-
-		# It performs the mutation
-                for j in range(m):
-
-                    if np.random.uniform(0, 1) <= searchspace.pMutation:
-
-                        mutation_index = np.random.randint(0, len(n))
-                        _, v = maps[mutation_index]
-                        tmp[i][mutation_index] = v.uniform_random_element()
-
-                # changes the generation
-                for j in range(m):
-                    for k in n:
-                        searchspace.a[j].x[k] = tmp[j][k]
+                self.update_particle_velocity(s, i)
+                self.update_particle_position(s, i)
+                self.check_limits()
 
             searchspace.schedule()
 
@@ -103,4 +64,22 @@ class Ga(Strategy):
             info_output(t, max_itrs, searchspace.gfit, datetime.timedelta(seconds=elapsed_time))
 
         print('\nFINISHED - OK (minimum fitness value {})'.format(searchspace.gfit))
+
+    def update_particle_velocity(self, searchspace, i):
+
+        r1 = np.random.uniform(0,1)
+        r2 = np.random.uniform(0,1)
+
+        s = searchspace
+        for j in range(s.n):
+            s.a[i].v[j] = s.w*s.a[i].v[j] + s.c1*r1*(s.a[i].xl[j] \
+                    - s.a[i].x[j]) + s.c2*r2*(s.g[j] - s.a[i].x[j])
+
+    def update_particle_position(self, searchspace, i):
+
+        s = searchspace
+        for j in range(s.n):
+            s.a[i].x[j] = s.a[i].x[j] + s.a[i].v[j]
+
+
 

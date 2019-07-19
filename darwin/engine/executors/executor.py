@@ -1,7 +1,6 @@
 
 import abc
 import configparser
-import contextlib
 import collections
 import htcondor
 import logging
@@ -13,17 +12,22 @@ import shutil
 
 from darwin._constants import drm
 
-@contextlib.contextmanager
-def agentwd(child):
-
-    parent_dir = os.getcwd()
-    try:
-        os.chdir(child)
-        yield child
-    finally:
-        os.chdir(parent_dir)
+from darwin.engine.particles import Particle
 
 logger = logging.getLogger(__name__)
+
+def exectime(line):
+    def decorator(func):
+        def timing(*args, **kwargs):
+            start_time = time.time()
+            return_value = func(*args, **kwargs)
+            run_time = time.time() - start_time
+            info = '{} {}'.format(line, datetime.timedelta(seconds=run_time))
+            logger.info(info)
+            print(info)
+            return return_value
+        return timing
+    return decorator
 
 def copyas(src, dst):
     if not os.path.isabs(src):
@@ -59,21 +63,11 @@ class Executor(abc.ABC):
 
     class ContextHandler():
 
-        def __init__(self, func, searchspace, optdir='darwin.opt', env='darwin.exec'):
-
+        def __init__(self, optdir='darwin.opt', env='darwin.exec'):
             self._root = os.getcwd()
             self._execdir = os.path.join(self._root, env)
             self._optdir = os.path.join(self._root, optdir)
-
-            self._iteration = os.path.join(self._execdir, 'iteration_initial')
-
-            data = []
-            for idx in range(searchspace.m):
-                data.append('agent_{}'.format(idx))
-            self._agents = tuple(data)
-
-            self._searchspace = searchspace
-            self._func = func
+            self._iteration = 'initial'
 
         @property
         def rootpath(self):
@@ -88,50 +82,25 @@ class Executor(abc.ABC):
             return self._optdir
 
         @property
-        def iteration(self):
-            return self._iteration
+        def iterationpath(self):
+            return os.path.join(self._execdir,
+                    'iteration_{}'.format(self._iteration))
 
-        @iteration.setter
-        def iteration(self, it):
+        @iterationpath.setter
+        def iterationpath(self, it):
             self._iteration = it
 
-        @property
-        def iterationpath(self):
-            return os.path.join(self._execdir, 'iteration_' + str(self._iteration))
-
-        @property
-        def agentpathlist(self):
-            itpath = self.iterationpath
-            return tuple(os.path.join(itpath, agent) for agent in self._agents)
+        def particlepath(self, name):
+            return os.path.join(self.iterationpath, name)
 
         def __enter__(self):
-
-            # get all agent paths, create folders and symbolic link to
-            # original files
-            for agentpath in self.agentpathlist:
-                copyas(self._optdir, agentpath)
-
+            # create folders soft linking files to designated particle folders
+            for name in Particle.names():
+                copyas(self._optdir, self.particlepath(name))
             return self
 
         def __exit__(self, *exec_details):
-
-            # execute all agents evaluation
-            for idx, agentdir in enumerate(self.agentpathlist):
-                logger.info('changed to wd "{}"'.format(agentdir))
-                os.chdir(agentdir)
-                instantfit = self._func()
-                if instantfit < 0:
-                    logger.error('negative fitness value found: {}'.format(
-                        instantfit))
-                    sys.exit(1)
-
-                logger.info('iter: {} agent: {} fit: {} dir: {}'.format(
-                    self.iteration, idx, instantfit, agentdir))
-                self._searchspace.a[idx].fit = instantfit
-
-            # on exit return to root folder
-            os.chdir(self._root)
-            self._searchspace.update()
+            Particle.evaluateall(self.iterationpath)
 
     # define single instance (singleton)
     _instance = None
@@ -141,51 +110,52 @@ class Executor(abc.ABC):
             Executor._instance = super().__new__(cls)
         return Executor._instance
 
-    def __init__(self, data, filename, procs=1, timeout=None):
+    def __init__(self, config):
 
         # verify if submit file exists
-        if not os.path.isfile(filename):
-            logger.error('file "{}" not found, exiting.'.format(filename))
+        if not os.path.isfile(config.submitfile):
+            logger.error('file "{}" not found'.format(config.submitfile))
             sys.exit(1)
 
         # get the submit file for the darwin application
         self._submitf = configparser.ConfigParser()
-        self._submitf.read(filename)
+        self._submitf.read(config.submitfile)
 
-        # save the func to be executed
-        self._func = data.func
+        # create path object to handle multiple paths
+        self._handler = Executor.ContextHandler(optdir=config.optdir,
+                env=config.execdir)
 
         # create the dictionary responsible to hold all registered searchspaces
-        self._jobs = collections.deque()
+        # self._jobs = collections.deque()
 
         # save timeout for job
-        self._timeout = timeout
+        self._timeout = config.timeout
 
         # stretegy reference
         self._strategy = None
 
-
-    def register_strategy(self, strategy):
+    def set_strategy(self, strategy):
         self._strategy = strategy
 
-    def register_job(self, job):
-        self._jobs.append(job)
+    # def register_job(self, job):
+    #     self._jobs.append(job)
 
     @abc.abstractmethod
-    def _execute(self, handler):
+    def _core_optimization(self, handler):
         raise NotImplementedError
 
-    def execute(self, searchspace):
+    @exectime('Total optimization time is')
+    def optimize(self):
+        handler = self._handler
+
+        # get all particles as tuple
+        particles = Particle.particles()
 
         # register executor for every agent
-        searchspace.register_executor(self)
-        self._strategy.initializer(searchspace)
+        self._strategy.initialize(particles)
 
         # create all generators used inside the excution process
-        generator = self._strategy.step(searchspace)
-
-        # create path object to handle multiple paths
-        handler = Executor.ContextHandler(self._func, searchspace)
+        generator = self._strategy.generator(particles)
 
         if not os.path.exists(handler.optdirpath):
             logger.error('an optdir containing all optimization files must be',
@@ -197,10 +167,10 @@ class Executor(abc.ABC):
                 os.path.isdir(handler.execdirpath):
             shutil.rmtree(handler.execdirpath, ignore_errors=True)
 
-        handler.iteration = 'inital'
+        handler.iteration = 'initial'
         with handler:
             print('Evaluating random initialization of searchspace\n')
-            self._execute(handler)
+            self._core_optimization(handler, particles)
 
         # iteration = 0
         finished = False

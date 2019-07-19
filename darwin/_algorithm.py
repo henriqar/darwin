@@ -7,14 +7,23 @@ import platform
 import sys
 import time
 
-import darwin.engine.executors as executors
 import darwin.engine.strategies as strategies
+import darwin.engine.executors as executors
+import darwin.engine.particles as particles
 
 from darwin._constants import opt, drm
-from darwin.engine.paramspace import Paramspace
+from darwin.engine.particles import Particle
+from darwin.engine.spaces import Searchspace
 from darwin.version import __version__
 
 logger = logging.getLogger(__name__)
+
+class Setter():
+    def __init__(self, func, doc=None):
+        self.func = func
+        self.__doc__ = doc if doc is not None else func.__doc__
+    def __set__(self, obj, value):
+        return self.func(obj, value)
 
 class Algorithm():
 
@@ -32,597 +41,375 @@ class Algorithm():
                     logger.error('undefined required value "{}"'.format(attr))
                     sys.exit(1)
 
-    def __init__(self, opt_alg, log_file='darwin.log'):
+    def __init__(self, opt_alg):
 
-        self._data = Algorithm.Data()
+        self.data = Algorithm.Data()
+        self.data.iterations = 10
+        self.data.executor = drm.Local
+
+        self.config = Algorithm.Data()
+        self.config.timeout = None
+        self.config.parallelism = 3600
+        self.config.submitfile = 'darwin.submit'
+        self.config.optdir = 'darwin.opt'
+        self.config.execdir = 'darwin.exec'
 
         # create paramspace
-        self._pspace = Paramspace()
+        self._searchspace = Searchspace()
 
         # define the execution engine
-        self._executor = drm.LOCAL
-
-        self._m = 0
+        self._executor = drm.Local
 
         if hasattr(opt, opt_alg):
-            self._data.optimization = opt_alg
+            self.data.optimization = opt_alg
         else:
             logger.error('unexpected optimization algorithm defined')
             sys.exit(1)
-
-        # create the dictionary to call the fectories with kwargs
-        self._kwargs = {}
 
     def add_parameter(self, name, param, formatter=None, discrete=False):
 
         # use the paramspace instance to handle the creation and managing os
         # searchspaces
-        self._pspace.add_param(name, param, formatter, discrete)
+        self._searchspace.add_param(name, param, formatter, discrete)
 
     def add_exclusive_group(self, *groups):
 
         # use the paramspace instance to handle the creation and managing os
         # searchspaces
-        self._pspace.add_exclusive_group(*groups)
+        self._searchspace.add_exclusive_group(*groups)
 
-    @property
-    def function(self):
-        return self._data.func
-
-    @function.setter
+    @Setter
     def function(self, func):
+        Particle.set_function(func)
 
-        # save the function to be minimized
-        if callable(func):
-            self._data.func = func
-        else:
-            logger.error('func {} is not a callable object'.format(func))
-            sys.exit(1)
-
-    @property
-    def exec_engine(self):
-        return self._data.executor
-
-    @exec_engine.setter
+    @Setter
     def exec_engine(self, executor):
         if not hasattr(drm, executor):
             logger.error('unexpected executor value {}'.format(executor))
             sys.exit(1)
         else:
-            self._data.executor = executor
+            self.data.executor = executor
 
-    @property
-    def seed(self):
-        return np.random.get_state()[1][0]
-
-    @seed.setter
+    @Setter
     def seed(self, seed):
         np.random.seed(seed)
 
-    @property
-    def agents(self):
-        return self._pspace.m
-
-    @agents.setter
-    def agents(self, nro_agents):
+    @Setter
+    def particles(self, total):
 
         # define how many agents to be used
-        if nro_agents <= 0:
-            logger.error('incorrect number of agents: {}'.format(nro_agents))
+        number = int(total)
+        if number <= 0:
+            logger.error('incorrect number of particles: {}'.format(number))
             sys.exit(1)
         else:
-            self._data.m = int(nro_agents)
+            for _ in range(number):
+               particles.factory(self.data.optimization)
 
-    @property
+    @Setter
     def iterations(self, max_itrs):
-        return self._data.iterations
+        self.data.iterations = int(max_itrs)
 
-    @iterations.setter
-    def iterations(self, max_itrs):
-        self._data.iterations = int(max_itrs)
+    @Setter
+    def submitfile(self, name='darwin.submit'):
+        self.config.submitfile = name
 
-    def start(self, filename='darwin.submit'):
+    @Setter
+    def optdir(self, name):
+        self.config.optdir = name
 
-        if len(self._pspace) == 0:
+    @Setter
+    def job_timeout(self, seconds):
+        self.config.timeout = seconds
+
+    @Setter
+    def parallel_jobs(self, number):
+        self.config.parallelism = number
+
+    def start(self):
+
+        if len(self._searchspace) == 0:
             logger.error('no map specified')
             sys.exit(1)
-
-        required = ('m', 'func', 'executor', 'optimization')
-        self._data.hasrequired(required)
+        else:
+            self._searchspace.build()
 
         # get the seed
-        self._data.seed = np.random.get_state()[1][0]
+        self.data.seed = np.random.get_state()[1][0]
+
+        # create strategy and executor
+        algorithm = strategies.factory(self.data.optimization, self.data)
+        executor = executors.factory(self.data.executor, self.config)
+        executor.set_strategy(algorithm)
 
         # print and log information
         self.print_data()
 
-        # create paramspace and the corresponfding searchspaces to find the
-        # optmization
-        self._pspace.build()
-        searchspaces = self._pspace.create_searchspaces(self._data)
-
-        for sp in searchspaces:
-            sp.init_agents(self._data.m)
-
-        # create optimization algorithm execution
-        optimization = strategies.factory(self._data, self._pspace)
-
-        # create executor
-        executor = executors.factory(self._data, filename, procs=1,
-                timeout=None)
-        executor.register_strategy(optimization)
-
-        start_time = time.time()
-
-        executor.execute(searchspaces[0])
-
-        elapsed_time = time.time() - start_time
-        print('\nTotal optimization time: ', datetime.timedelta(
-            seconds=elapsed_time))
-        logger.info('\nTotal optimization time: {}'.format(datetime.timedelta(
-            seconds=elapsed_time)))
+        executor.optimize()
 
     def print_data(self):
 
         print('-'*80)
         print('darwin v{}\n'.format(__version__))
 
-        print('Opt algorithm chosen -> ', self._data.optimization)
+        print('Opt algorithm chosen -> ', self.data.optimization)
         logger.info('Opt algorithm chosen -> {}'.format(
-            self._data.optimization))
+            self.data.optimization))
 
-        print('DRM engine chosen -> {}'.format(self._data.executor))
-        logger.info('DRM engine chosen -> {}'.format(self._data.executor))
+        print('DRM engine chosen -> {}'.format(self.data.executor))
+        logger.info('DRM engine chosen -> {}'.format(self.data.executor))
 
-        print('Max iterations -> {}'.format(self._data.iterations))
-        logger.info('Max iterations -> {}'.format(self._data.iterations))
+        print('Max iterations -> {}'.format(self.data.iterations))
+        logger.info('Max iterations -> {}'.format(self.data.iterations))
 
-        print('Seed -> {}\n'.format(self._data.seed))
+        print('Seed -> {}\n'.format(self.data.seed))
         logger.info('Seed -> {}'.format(self.seed))
-
-    # from here on we will create all methods to store specific parameters for
-    # each type of optimizations
 
     # ABC specific information ------------------------------------------------
 
-    @property
-    def trial_limit(self):
-        return self._data.trial_limit
-
-    @trial_limit.setter
+    @Setter
     def trial_limit(self, value):
-        self._data.trial_limit = value
+        self.data.trial_limit = value
 
     # ABO specific information ------------------------------------------------
 
-    @property
-    def ratio_e(self):
-        return self._data.ratio
-
-    @ratio_e.setter
+    @Setter
     def ratio_e(self, value):
-        self._data.ratio = value
+        self.data.ratio = value
 
-    @property
-    def step_e(self):
-        return self._data.step_e
-
-    @step_e.setter
+    @Setter
     def step_e(self, value):
-        self._data.step_e = value
+        self.data.step_e = value
 
     # BA specific information -------------------------------------------------
 
-    @property
-    def f_min(self):
-        return self._data.f_min
-
-    @f_min.setter
+    @Setter
     def f_min(self, value):
-        self._data.f_min = value
+        self.data.f_min = value
 
-    @property
-    def f_max(self):
-        return self._data.f_max
-
-    @f_max.setter
+    @Setter
     def f_max(self, value):
-        self._data.f_max = value
+        self.data.f_max = value
 
-    @property
-    def A(self):
-        return self._data.A
-
-    @A.setter
+    @Setter
     def A(self, value):
-        self._data.A = value
+        self.data.A = value
 
-    @property
-    def r(self):
-        return self._data.r
-
-    @r.setter
+    @Setter
     def r(self, value):
-        self._data.r = value
+        self.data.r = value
 
     # BSA specific information ------------------------------------------------
 
-    @property
-    def mix_rate(self):
-        return self._data.mix_rate
-
-    @mix_rate.setter
+    @Setter
     def mix_rate(self, value):
-        self._data.mix_rate = value
+        self.data.mix_rate = value
 
-    @property
-    def F(self):
-        return self._data.F
-
-    @F.setter
+    @Setter
     def F(self, value):
-        self._data.F = value
+        self.data.F = value
 
     # BSO specific information ------------------------------------------------
 
-    @property
-    def k(self):
-        return self._data.k
-
-    @k.setter
+    @Setter
     def k(self, value):
-        self._data.k = value
+        self.data.k = value
 
-    @property
-    def p_one_cluster(self):
-        return self._data.p_one_cluster
-
-    @p_one_cluster.setter
+    @Setter
     def p_one_cluster(self, value):
-        self._data.p_one_cluster = value
+        self.data.p_one_cluster = value
 
-    @property
-    def p_one_center(self):
-        return self._data.p_one_center
-
-    @p_one_center.setter
+    @Setter
     def p_one_center(self, value):
-        self._data.p_one_center = value
+        self.data.p_one_center = value
 
-    @property
-    def p_two_centers(self):
-        return self._data.p_two_centers
-
-    @p_two_centers.setter
+    @Setter
     def p_two_centers(self, value):
-        self._data.p_two_centers = value
+        self.data.p_two_centers = value
 
     # CS specific information -------------------------------------------------
 
-    @property
-    def beta(self):
-        return self._data.beta
-
-    @beta.setter
+    @Setter
     def beta(self, value):
-        self._data.beta = value
+        self.data.beta = value
 
-    @property
-    def p(self):
-        return self._data.p
-
-    @p.setter
+    @Setter
     def p(self, value):
-        self._data.p = value
+        self.data.p = value
 
-    @property
-    def alpha(self):
-        return self._data.alpha
-
-    @alpha.setter
+    @Setter
     def alpha(self, value):
-        self._data.alpha = value
+        self.data.alpha = value
 
     # DE specific information -------------------------------------------------
 
-    @property
-    def mutation_factor(self):
-        return self._data.mutation_factor
-
-    @mutation_factor.setter
+    @Setter
     def mutation_factor(self, value):
-        self._data.mutation_factor = value
+        self.data.mutation_factor = value
 
-    @property
-    def crossover_probability(self):
-        return self._data.crossover_probability
-
-    @crossover_probability.setter
+    @Setter
     def crossover_probability(self, value):
-        self._data.crossover_probability = value
+        self.data.crossover_probability = value
 
     # FA specific information -------------------------------------------------
 
-    @property
-    def gamma(self):
-        return self._data.gamma
-
-    @gamma.setter
+    @Setter
     def gamma(self, value):
-        self._data.gamma = value
+        self.data.gamma = value
 
     # GA specific information -------------------------------------------------
 
-    @property
-    def mutation_probability(self, mut_prob):
-        return self._data.mutation_probability
-
-    @mutation_probability.setter
+    @Setter
     def mutation_probability(self, mut_prob):
 
         if mut_prob >= 0 or mut_prob <= 1:
-            self._kwargs['mutation_probability'] = float(mut_prob)
-            self._data.mutation_probability = float(mut_prob)
+            self.data.mutation_probability = float(mut_prob)
         else:
             logger.error('mutation probabilty must be inside range [0,1]')
             sys.exit(1)
 
     # GP specific information -------------------------------------------------
 
-    @property
-    def reproduction_probability(self, val):
-        return self._data.reproduction_probability
-
-    @reproduction_probability.setter
+    @Setter
     def reproduction_probability(self, val):
 
         if val >= 0 or val <= 1:
-            self._kwargs['reproduction_probability'] = float(val)
-            self._data.reproduction_probability = float(val)
+            self.data.reproduction_probability = float(val)
         else:
             logger.error('reproduction probability must be inside range [0,1]')
             sys.exit(1)
 
-    @property
-    def minimum_depth_tree(self):
-        return self._data.minimum_depth_tree
-
-    @minimum_depth_tree.setter
+    @Setter
     def minimum_depth_tree(self, value):
-        self._data.minimum_depth_tree = value
+        self.data.minimum_depth_tree = value
 
-    @property
-    def maximum_depth_tree(self):
-        return self._data.maximum_depth_tree
-
-    @maximum_depth_tree.setter
+    @Setter
     def maximum_depth_tree(self, value):
-        self._data.maximum_depth_tree = value
+        self.data.maximum_depth_tree = value
 
     # HS specific information -------------------------------------------------
 
-    @property
-    def HMCR(self):
-        return self._data.HMCR
-
-    @HMCR.setter
+    @Setter
     def HMCR(self, value):
-        self._data.HMCR = value
+        self.data.HMCR = value
 
-    @property
-    def PAR(self):
-        return self._data.PAR
-
-    @PAR.setter
+    @Setter
     def PAR(self, value):
-        self._data.PAR = value
+        self.data.PAR = value
 
-    @property
-    def PAR_min(self):
-        return self._data.PAR_min
-
-    @PAR_min.setter
+    @Setter
     def PAR_min(self, value):
-        self._data.PAR_min = value
+        self.data.PAR_min = value
 
-    @property
-    def PAR_max(self):
-        return self._data.PAR_max
-
-    @PAR_max.setter
+    @Setter
     def PAR_max(self, value):
-        self._data.PAR_max = value
+        self.data.PAR_max = value
 
-    @property
-    def bw(self):
-        return self._data.bw
-
-    @bw.setter
+    @Setter
     def bw(self, value):
-        self._data.bw = value
+        self.data.bw = value
 
     @property
     def bw_min(self):
-        return self._data.bw_min
+        return self.data.bw_min
 
-    @bw_min.setter
+    @Setter
     def bw_min(self, value):
-        self._data.bw_min = value
+        self.data.bw_min = value
 
-    @property
-    def bw_max(self):
-        return self._data.bw_max
-
-    @bw_max.setter
+    @Setter
     def bw_max(self, value):
-        self._data.bw_max = value
+        self.data.bw_max = value
 
     # LOA specific information ------------------------------------------------
 
-    @property
-    def sex_rate(self):
-        return self._data.sex_rate
-
-    @sex_rate.setter
+    @Setter
     def sex_rate(self, value):
-        self._data.sex_rate = value
+        self.data.sex_rate = value
 
-    @property
-    def percent_nomad_lions(self):
-        return self._data.percent_nomad_lions
-
-    @percent_nomad_lions.setter
+    @Setter
     def percent_nomad_lions(self, value):
-        self._data.percent_nomad_lions = value
+        self.data.percent_nomad_lions = value
 
-    @property
-    def roaming_percent(self):
-        return self._data.roaming_percent
-
-    @roaming_percent.setter
+    @Setter
     def roaming_percent(self, value):
-        self._data.roaming_percent = value
+        self.data.roaming_percent = value
 
-    @property
-    def mating_probability(self):
-        return self._data.mating_probability
-
-    @mating_probability.setter
+    @Setter
     def mating_probability(self, value):
-        self._data.mating_probability = value
+        self.data.mating_probability = value
 
-    @property
-    def immigrating_rate(self):
-        return self._data.immigrating_rate
-
-    @immigrating_rate.setter
+    @Setter
     def immigrating_rate(self, value):
-        self._data.immigrating_rate = value
+        self.data.immigrating_rate = value
 
-    @property
-    def number_of_prides(self):
-        return self._data.number_of_prides
-
-    @number_of_prides.setter
+    @Setter
     def number_of_prides(self, value):
-        self._data.number_of_prides = value
+        self.data.number_of_prides = value
 
     # MBO specific information ------------------------------------------------
 
-    @property
-    def k(self):
-        return self._data.k
-
-    @k.setter
+    @Setter
     def k(self, value):
-        self._data.k = value
+        self.data.k = value
 
-    @property
-    def X(self):
-        return self._data.X
-
-    @X.setter
+    @Setter
     def X(self, value):
-        self._data.X = value
+        self.data.X = value
 
-    @property
-    def M(self):
-        return self._data.M
-
-    @M.setter
+    @Setter
     def M(self, value):
-        self._data.M = value
+        self.data.M = value
 
     # PSO specific information ------------------------------------------------
 
-    @property
-    def c1(self):
-        return self._data.c1
-
-    @c1.setter
+    @Setter
     def c1(self, value):
-        self._data.c1 = value
+        self.data.c1 = value
 
-    @property
-    def c2(self):
-        return self._data.c2
-
-    @c2.setter
+    @Setter
     def c2(self, value):
-        self._data.c2 = value
+        self.data.c2 = value
 
-    @property
-    def w(self):
-        return self._data.w
-
-    @w.setter
+    @Setter
     def w(self, value):
-        self._data.w = value
+        self.data.w = value
 
-    @property
-    def w_min(self):
-        return self._data.w_min
-
-    @w_min.setter
+    @Setter
     def w_min(self, value):
-        self._data.w_min = value
+        self.data.w_min = value
 
-    @property
-    def w_max(self):
-        return self._data.w_max
-
-    @w_max.setter
+    @Setter
     def w_max(self, value):
-        self._data.w_max = value
+        self.data.w_max = value
 
     # SA specific information -------------------------------------------------
 
-    @property
-    def initial_temperature(self):
-        return self._data.initial_temperature
-
-    @initial_temperature.setter
+    @Setter
     def initial_temperature(self, value):
-        self._data.initial_temperature = value
+        self.data.initial_temperature = value
 
-    @property
-    def final_temperature(self):
-        return self._data.final_temperature
-
-    @final_temperature.setter
+    @Setter
     def final_temperature(self, value):
-        self._data.final_temperature = value
+        self.data.final_temperature = value
 
-    @property
-    def cooling_schedule(self, val):
-        return self._data.boltzmann_annealing
-
-    @cooling_schedule.setter
+    @Setter
     def cooling_schedule(self, value):
 
         if val in ('boltzmann_annealing',):
-            self._kwargs['cooling_schedule'] = value
-            self._data.boltzmann_annealing = value
+            self.data.boltzmann_annealing = value
         else:
             logger.error('cooling schedule not recognized "{}"'.format(value))
             sys.exit(1)
 
     # WCA specific information ------------------------------------------------
 
-    @property
-    def nsr(self):
-        return self._data.nsr
-
-    @nsr.setter
+    @Setter
     def nsr(self, value):
-        self._data.nsr = value
+        self.data.nsr = value
 
-    @property
-    def dmax(self):
-        return self._data.dmax
-
-    @dmax.setter
+    @Setter
     def dmax(self, value):
-        self._data.dmax = value
+        self.data.dmax = value
 
 
