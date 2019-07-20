@@ -30,13 +30,13 @@ class MapItem():
             secure = self._mapref.ub
         self._holding = secure
 
-    def uniform_random_element(self):
+    def uniform_random(self):
         self.holding = self._mapref.uniform_random_element()
 
-    def gaussian_random_element(self):
+    def gaussian_random(self):
         self.holding = self._mapref.gaussian_random_element()
 
-    def cauchy_random_element(self):
+    def cauchy_random(self):
         self.holding = self._mapref.cauchy_random_element()
 
     # def __copy__(self):

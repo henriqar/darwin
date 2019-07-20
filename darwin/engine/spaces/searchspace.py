@@ -4,7 +4,7 @@ import numpy as np
 
 from types import MappingProxyType
 
-from darwin.engine.particles import Particle
+from darwin.engine.particles import ParticleUniverse
 
 from .map import Map
 from .mapitem import MapItem
@@ -85,11 +85,11 @@ class Searchspace:
 
     def _fillparticles(self):
 
-        Particle.set_nullitems([MapItem(*self._params[i]) for i in range(length)])
+        ParticleUniverse.set_nullitems([MapItem(*self._params[i]) for i in range(self._param_id)])
 
-        for particle in Particle.particles():
+        for particle in ParticleUniverse.particles():
             length = self._param_id
-            particle.set_position([MapItem(*self._params[i]) for i in range(length)])
+            particle.set_position([MapItem(*self._params[i]) for i in range(self._param_id)])
 
     def add_param(self, name, param, formatter, discrete):
 

@@ -3,7 +3,7 @@ import logging
 
 from .particle import Particle
 
-logger = loggin.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 class LionOptimizationAlgorithm:
     def __init__(self):

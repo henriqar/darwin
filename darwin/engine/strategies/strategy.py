@@ -10,10 +10,14 @@ class Strategy():
         self.data = data
 
     @abc.abstractmethod
-    def initialize(self, particles):
+    def initialize(self):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def generator(self, particles):
+    def fitness_evaluation(self):
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def generator(self):
        raise NotImplementedError
 

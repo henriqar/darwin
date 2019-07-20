@@ -3,7 +3,7 @@ import logging
 
 from .particle import Particle
 
-logger = getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 class MigratingBirdsOptimization(Particle):
     def __init__(self):

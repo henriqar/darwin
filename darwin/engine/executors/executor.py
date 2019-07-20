@@ -9,10 +9,11 @@ import shutil
 import sys
 import time
 import shutil
+import datetime
 
 from darwin._constants import drm
 
-from darwin.engine.particles import Particle
+from darwin.engine.particles import ParticleUniverse
 
 logger = logging.getLogger(__name__)
 
@@ -58,12 +59,12 @@ def copyas(src, dst):
     if errors:
         raise Error(errors)
 
-
 class Executor(abc.ABC):
 
     class ContextHandler():
 
-        def __init__(self, optdir='darwin.opt', env='darwin.exec'):
+        def __init__(self, strategy, optdir='darwin.opt', env='darwin.exec'):
+            self._strategy = strategy
             self._root = os.getcwd()
             self._execdir = os.path.join(self._root, env)
             self._optdir = os.path.join(self._root, optdir)
@@ -95,12 +96,12 @@ class Executor(abc.ABC):
 
         def __enter__(self):
             # create folders soft linking files to designated particle folders
-            for name in Particle.names():
+            for name in ParticleUniverse.names():
                 copyas(self._optdir, self.particlepath(name))
             return self
 
         def __exit__(self, *exec_details):
-            Particle.evaluateall(self.iterationpath)
+            ParticleUniverse.evaluateall(self.iterationpath, self._strategy)
 
     # define single instance (singleton)
     _instance = None
@@ -117,16 +118,15 @@ class Executor(abc.ABC):
             logger.error('file "{}" not found'.format(config.submitfile))
             sys.exit(1)
 
+        # save the config
+        self._config = config
+
         # get the submit file for the darwin application
         self._submitf = configparser.ConfigParser()
         self._submitf.read(config.submitfile)
 
         # create path object to handle multiple paths
-        self._handler = Executor.ContextHandler(optdir=config.optdir,
-                env=config.execdir)
-
-        # create the dictionary responsible to hold all registered searchspaces
-        # self._jobs = collections.deque()
+        self._handler = None
 
         # save timeout for job
         self._timeout = config.timeout
@@ -137,25 +137,25 @@ class Executor(abc.ABC):
     def set_strategy(self, strategy):
         self._strategy = strategy
 
-    # def register_job(self, job):
-    #     self._jobs.append(job)
-
     @abc.abstractmethod
-    def _core_optimization(self, handler):
+    def _core_optimization(self, handler, particles):
         raise NotImplementedError
 
     @exectime('Total optimization time is')
     def optimize(self):
+        # create path object to handle multiple paths
+        self._handler = Executor.ContextHandler(self._strategy,
+                optdir=self._config.optdir, env=self._config.execdir)
         handler = self._handler
 
         # get all particles as tuple
-        particles = Particle.particles()
+        particles = ParticleUniverse.particles()
 
         # register executor for every agent
-        self._strategy.initialize(particles)
+        self._strategy.initialize()
 
         # create all generators used inside the excution process
-        generator = self._strategy.generator(particles)
+        generator = self._strategy.generator()
 
         if not os.path.exists(handler.optdirpath):
             logger.error('an optdir containing all optimization files must be',
@@ -177,13 +177,13 @@ class Executor(abc.ABC):
         while not finished:
 
             try:
-                handler.iteration = next(generator)
+                handler.iterationpath = next(generator)
             except StopIteration:
-                searchspace.global_fitness()
                 finished = True
             else:
                 with handler:
-                    self._execute(handler)
+                    self._core_optimization(handler, particles)
+                # self._strategy.fitness_evaluation()
 
 
 

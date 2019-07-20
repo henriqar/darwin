@@ -1,7 +1,9 @@
 
-import re
+from .particle_universe import ParticleUniverse
 
-from importlib import import_module
+# import re
+
+# from importlib import import_module
 
 
 # def factory(optm, *args, **kwargs):

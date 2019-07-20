@@ -9,10 +9,9 @@ import time
 
 import darwin.engine.strategies as strategies
 import darwin.engine.executors as executors
-import darwin.engine.particles as particles
 
 from darwin._constants import opt, drm
-from darwin.engine.particles import Particle
+from darwin.engine.particles import ParticleUniverse
 from darwin.engine.spaces import Searchspace
 from darwin.version import __version__
 
@@ -80,7 +79,7 @@ class Algorithm():
 
     @Setter
     def function(self, func):
-        Particle.set_function(func)
+        ParticleUniverse.set_function(func)
 
     @Setter
     def exec_engine(self, executor):
@@ -103,8 +102,7 @@ class Algorithm():
             logger.error('incorrect number of particles: {}'.format(number))
             sys.exit(1)
         else:
-            for _ in range(number):
-               particles.factory(self.data.optimization)
+            ParticleUniverse.size(number, self.data.optimization)
 
     @Setter
     def iterations(self, max_itrs):

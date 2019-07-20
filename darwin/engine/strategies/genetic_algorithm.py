@@ -8,6 +8,8 @@ import time
 
 from . import Strategy
 
+from darwin.engine.particles import ParticleUniverse
+
 logger = logging.getLogger(__name__)
 
 def header_output(iteration, fitness, elapsed_time):
@@ -25,21 +27,29 @@ class GeneticAlgorithm(Strategy):
         selection_probs = [c.fitness/maximum for c in population]
         return np.random.choice(len(population), p=selection_probs, size=k)
 
-    def initialize(self, particles):
-        assert isinstance(particles, (tuple, list))
-        for p in particles:
+    def initialize(self):
+        for p in ParticleUniverse.particles():
             for pos in p.position:
-                pos.uniform_random_element()
+                pos.uniform_random()
             # p.schedule()
 
-    def generator(self, particles):
+    def fitness_evaluation(self):
+        for p in ParticleUniverse.particles():
+            if p.intermediate < p.fitness:
+                p.fitness = p.intermediate
+
+
+    def generator(self):
 
         # import pdb; pdb.set_trace()
+        particles = ParticleUniverse.particles()
         m = len(particles)
         n = particles[0].n
         data = self.data
 
-        tmp =
+        tmp = []
+        for p in particles:
+            tmp.append(ParticleUniverse.nullitems())
 
         # create the table of info
         header_output('Iteration', 'Fitness', 'Elapsed')
@@ -49,31 +59,31 @@ class GeneticAlgorithm(Strategy):
             for idx, agent in enumerate(particles):
 
 		# It performs the selectione
-                selection = self._roulette_selection(particles, len(particles))
+                selection = self._roulette_selection(particles, m)
 
                 # perform the crossover
-                for p in range(0, math.floor(len(particles)/2), 2):
+                for p in range(0, math.floor(m/2), 2):
 
                     crossover_index = np.random.uniform(0, m)
                     for k in range(n):
 
                         if k < crossover_index:
-                            tmp[p][k] = particles[selection[p]][k]
-                            tmp[p+1][k] = particles[selection[p+1]][k]
+                            tmp[p][k].holding = particles[selection[p]][k].holding
+                            tmp[p+1][k].holding = particles[selection[p+1]][k].holding
                         else:
-                            tmp[p][k] = particles[selection[p+1]][k]
-                            tmp[p+1][k] = particles[selection[p]][k]
+                            tmp[p][k].holding = particles[selection[p+1]][k].holding
+                            tmp[p+1][k].holding = particles[selection[p]][k].holding
 
-                if len(particles) % 2 == 0:
+                if m % 2 == 0:
 
                     crossover_index = np.random.uniform(0, n)
 
                     for k in range(n):
 
                         if k < crossover_index:
-                            tmp[len(particles)-1][k] = particles[selection[len(particles)-1]][k]
+                            tmp[m-1][k].holding = particles[selection[m-1]][k].holding
                         else:
-                            tmp[len(particles)-1][k] = particles[selection[0]][k]
+                            tmp[m-1][k].holding = particles[selection[0]][k].holding
 
 		# It performs the mutation
                 for j in range(m):
@@ -81,13 +91,15 @@ class GeneticAlgorithm(Strategy):
                     if np.random.uniform(0, 1) <= data.mutation_probability:
 
                         mutation_index = np.random.randint(0, n)
-                        tmp[idx][mutation_index] = particles[j][mutation_index].uniform_random_element()
+                        particles[j][mutation_index].uniform_random()
+                        tmp[idx][mutation_index].holding = particles[j][mutation_index].holding
+                        # tmp[idx][mutation_index].holding = particles[j][mutation_index].uniform_random()
 
                 # changes the generation
-                import pdb; pdb.set_trace()
+                # import pdb; pdb.set_trace()
                 for j in range(m):
                     for k in range(n):
-                        particles[j][k].holding = tmp[j][k]
+                        particles[j][k].holding = tmp[j][k].holding
 
             # get the time elapsed
             start_time = time.time()
@@ -99,7 +111,7 @@ class GeneticAlgorithm(Strategy):
             elapsed_time = time.time() - start_time
 
             # information output
-            info_output(t, iterations, searchspace.gfit, datetime.timedelta(seconds=elapsed_time))
+            info_output(t, data.iterations, ParticleUniverse.global_fitness, datetime.timedelta(seconds=elapsed_time))
 
-        print('\nFINISHED - OK (minimum fitness value {})'.format(searchspace.gfit))
+        print('\nFINISHED - OK (minimum fitness value {})'.format(ParticleUniverse.global_fitness))
 

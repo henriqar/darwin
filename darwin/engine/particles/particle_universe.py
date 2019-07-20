@@ -6,7 +6,13 @@ import contextlib
 import os
 import copy
 
+from darwin._constants import opt
+
 from .particle import Particle
+from .bat_algorithm import BatAlgorithm
+from .lion_optimization_algorithm import LionOptimizationAlgorithm
+from .migrating_birds_optimization import MigratingBirdsOptimization
+from .particle_swarm_optimization import ParticleSwarmOptimization
 
 logger = logging.getLogger(__name__)
 
@@ -26,32 +32,32 @@ class ParticleUniverse():
     # class knows which instances exist and index each one by its name
     __instance = -1
     __instances = collections.OrderedDict()
-    __nulliitems = None
+    __nullitems = None
 
     @classmethod
-    def factory(cls, optm, *args, **kwargs):
+    def size(cls, n, opt):
 
-        try:
-            regex = r'[A-Z][^A-Z]*'
-            module = '_'.join([x.lower() for x in re.findall(regex, optm)])
+        for _ in range(n):
+            cls.__factory(opt)
 
-            exec_ = import_module('.' +  module, package='darwin.engine.particles')
-            class_ = getattr(exec_, optm)
+    @classmethod
+    def __factory(cls, optm, *args, **kwargs):
 
-            instance = class_(*args, **kwargs)
-        except ImportError:
-            instance = Particle(*args, **kwargs)
-        except AttributeError:
-            raise ImportError('{} is not a child of particle'.format(optm))
+        if optm == opt.BatAlgorithm:
+            instance = BatAlgorithm()
+        elif optm == opt.LionOptimizationAlgorithm:
+            instance = LionOptimizationAlgorithm()
+        elif optm == opt.MigratingBirdsOptimization:
+            instance = MigratingBirdsOptimization()
+        elif optm == opt.ParticleSwarmOptimization:
+            instance = ParticleSwarmOptimization()
         else:
-            if not issubclass(class_, Particles):
-                raise ImportError('there is no {} particle implemented')
+            instance = Particle()
 
         cls.__instance += 1
         name = 'particle_{}'.format(cls.__instance)
         instance._name = name
         cls.__instances[name] = instance
-        return instance
 
     @classmethod
     def set_function(cls, func):
@@ -77,7 +83,7 @@ class ParticleUniverse():
         return tuple(cls.__instances.values())
 
     @classmethod
-    def evaluateall(cls, root):
+    def evaluateall(cls, root, strategy):
         with securewd():
             for name, particle in cls.__instances.items():
                 ppath = os.path.join(root, name)
@@ -90,6 +96,7 @@ class ParticleUniverse():
                 particle.intermediate = fitness
 
         # after evaluating, update global fitness
+        strategy.fitness_evaluation()
         cls.__updateglobal()
 
     @classmethod
@@ -100,10 +107,12 @@ class ParticleUniverse():
 
     @classmethod
     def set_nullitems(cls, items):
+        for _ in items:
+            _.holding = 0
         cls.__nullitems = items
 
     @classmethod
     def nullitems(cls):
-        return copy.deepcopy(cls.__nulliitems)
+        return copy.deepcopy(cls.__nullitems)
 
 
