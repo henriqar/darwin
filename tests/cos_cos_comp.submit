@@ -6,9 +6,6 @@
 
 [darwin]
 
-#executable=/bin/sleep
-executable=cos_cos
-
 # (TODO)
 # define the collector from htcondor to use
 collector=lsc.ic.unicamp.br
@@ -33,6 +30,9 @@ exec_time=6
 # and how the program work
 [htcondor]
 
+#executable=/bin/sleep
+executable=cos_cos_comp.sh
+
 universe=vanilla
 
 #error=%(darwin_ag)s/logs/err.$(ClusterId)
@@ -47,7 +47,8 @@ log=log.$(ClusterId)
 #initialdir=files
 
 # in the case where the filesystem is not shared, if shared use NO
-#should_transfer_files = YES
+should_transfer_files = IF_NEEDED
+transfer_input_files = cos_cos.c
 
 #when_to_transfer_output = ON_EXIT
 #transfer_input_files = files/in1,files/in2

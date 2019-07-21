@@ -15,13 +15,12 @@ class _Constants:
 drm = _Constants()
 opt = _Constants()
 
-drm.LOCAL = 'LOCAL'        # TODO
-drm.SEQ_LOCAL = 'SEQ_LOCO' # TODO
-drm.HTCONDOR = 'HTCONDOR'
+drm.Local = 'Local'        # TODO
+drm.HTCondor = 'HTCondor'
 
 opt.ABC = 'ABC'
 opt.ABO = 'ABO'
-opt.BA = 'BA'
+opt.BatAlgorithm = 'BatAlgorithm'
 opt.BHA = 'BHA'
 opt.BSA = 'BSA'
 opt.BSO = 'BSO'
@@ -29,15 +28,15 @@ opt.CS = 'CS'
 opt.DE = 'DE'
 opt.FA = 'FA'
 opt.FPA = 'FPA'
-opt.GA = 'GA'
-opt.GP = 'GP'
+opt.GeneticAlgorithm = 'GeneticAlgorithm'
+opt.GP = 'GeneticProgramming'
 opt.HS = 'HS'
 opt.JADE = 'JADE'
-opt.LOA = 'LOA'
-opt.MBO = 'MBO'
+opt.LionOptimizationAlgorithm = 'LionOptimizationAlgorithm'
+opt.MigratingBirdsOptimization = 'MigratingBirdsOptimization'
 opt.OPT = 'OPT'
-opt.PSO = 'PSO'
-opt.SA = 'SA'
+opt.ParticleSwarmOptimization = 'ParticleSwarmOptimization'
+opt.SimulatedAnnealing = 'SimulatedAnnealing'
 opt.WCA = 'WCA'
 
     # _LOCAL = 0

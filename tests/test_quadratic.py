@@ -5,7 +5,7 @@ def Quadratic():
     return 10
 
 # get the algorithm to gbe used for the op[timization
-opt = darwin.Algorithm(darwin.opt.GA)
+opt = darwin.Algorithm(darwin.opt.GeneticAlgorithm)
 
 # define the mapping parameters used
 map1 = (1,2,3,4)
@@ -16,7 +16,7 @@ opt.add_parameter('map2', map2, discrete=True)
 
 # default darwin parameters
 opt.function = Quadratic
-opt.agents = 10
+opt.particles = 10
 opt.iterations = 10
 
 # exclusive required GA parameters

@@ -6,7 +6,7 @@ def fitness():
         return float(fp.read())
 
 # get the algorithm to gbe used for the op[timization
-opt = darwin.Algorithm(darwin.opt.GeneticAlgorithm)
+opt = darwin.Algorithm(darwin.opt.GA)
 
 # define the mapping parameters used
 x = (-200,+200)
@@ -16,15 +16,14 @@ opt.add_parameter('x', x)
 opt.add_parameter('y', y)
 
 # define htcondor execution engine
-opt.exec_engine = darwin.drm.HTCondor
+opt.exec_engine = darwin.drm.HTCONDOR
 
 # default darwin parameters
 opt.function = fitness
-opt.particles = 10
+opt.agents = 10
 opt.iterations = 10
 
 # exclusive required GA parameters
 opt.mutation_probability = 0.05
 
-opt.submitfile = 'cos_cos.submit'
-opt.start()
+opt.start('cos_cos_comp.submit')

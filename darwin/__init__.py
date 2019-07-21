@@ -7,13 +7,12 @@ from .dsl import Formatter
 from ._constants import drm
 from ._constants import opt
 
-
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
 # instantiate and create the project logger
 _cmd = logging.StreamHandler()
-_file = logging.FileHandler('darwin.log')
+_file = logging.FileHandler(filename='darwin.log')
 
 _cmd.setLevel(logging.WARNING)
 _file.setLevel(logging.INFO)
