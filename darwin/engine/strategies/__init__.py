@@ -1,9 +1,13 @@
 
 import re
+import logging
+import sys
 
 from importlib import import_module
 
 from .strategy import Strategy
+
+logger = logging.getLogger(__name__)
 
 def factory(optm, *args, **kwargs):
 
@@ -16,9 +20,11 @@ def factory(optm, *args, **kwargs):
 
         instance = class_(*args, **kwargs)
     except (AttributeError, ImportError):
-        raise ImportError('{} is not a child of strategy'. format(optm))
+        logger.error('{} is not a child of strategy'. format(optm))
+        sys.exit(1)
     else:
         if not issubclass(class_, Strategy):
-            raise ImportError('there is no {} strategy implemented')
+            logger.error('there is no {} strategy implemented')
+            sys.exit(1)
 
     return instance

@@ -28,16 +28,18 @@ class GeneticAlgorithm(Strategy):
         return np.random.choice(len(population), p=selection_probs, size=k)
 
     def initialize(self):
+
+        r = ('mutation_probability',)
+        self.data.hasrequired(r)
+
         for p in ParticleUniverse.particles():
             for pos in p.position:
                 pos.uniform_random()
-            # p.schedule()
 
     def fitness_evaluation(self):
         for p in ParticleUniverse.particles():
             if p.intermediate < p.fitness:
                 p.fitness = p.intermediate
-
 
     def generator(self):
 
@@ -111,7 +113,9 @@ class GeneticAlgorithm(Strategy):
             elapsed_time = time.time() - start_time
 
             # information output
-            info_output(t, data.iterations, ParticleUniverse.global_fitness, datetime.timedelta(seconds=elapsed_time))
+            info_output(t, data.iterations, ParticleUniverse.global_fitness,
+                    datetime.timedelta(seconds=elapsed_time))
 
-        print('\nFINISHED - OK (minimum fitness value {})'.format(ParticleUniverse.global_fitness))
+        print('\nFINISHED - OK (minimum fitness value {})'.format(
+            ParticleUniverse.global_fitness))
 
