@@ -47,7 +47,7 @@ class HTCondor(Executor):
 
             values = []
             for pos in p.position:
-                arg = '-{} {}'.format(pos.name, pos.holding)
+                arg = '-{} {}'.format(pos.name, pos.format())
                 values.append(arg)
 
             conf['htcondor']['arguments'] = ' '.join(values)

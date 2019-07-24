@@ -5,6 +5,9 @@
 #
 
 [darwin]
+#
+#executable=/bin/sleep
+executable=htcondor.sh
 
 # (TODO)
 # define the collector from htcondor to use
@@ -29,9 +32,6 @@ exec_time=15
 # although the user shoukld take care of defining the directoires
 # and how the program work
 [htcondor]
-
-#executable=/bin/sleep
-executable=htcondor.sh
 
 universe=vanilla
 

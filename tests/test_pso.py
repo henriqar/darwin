@@ -6,7 +6,7 @@ def fitness():
         return float(fp.read())
 
 # get the algorithm to gbe used for the op[timization
-opt = darwin.Algorithm(darwin.opt.GeneticAlgorithm)
+opt = darwin.Algorithm(darwin.opt.ParticleSwarmOptimization)
 
 # define the mapping parameters used
 x = (-200,+200)
@@ -24,7 +24,9 @@ opt.particles = 10
 opt.iterations = 10
 
 # exclusive required GA parameters
-opt.mutation_probability = 0.05
+opt.c1 = 1
+opt.c2 = 1
+opt.w = 0.5
 
-opt.submitfile = 'cos_cos.submit'
+opt.submitfile = 'sanity.submit'
 opt.start()

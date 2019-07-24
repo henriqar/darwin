@@ -3,6 +3,6 @@
 
 TIMETOWAIT="10"
 echo "sleeping for $TIMETOWAIT seconds"
-echo "$@" >> output.txt
+echo $@ > output.txt
 /bin/sleep $TIMETOWAIT
 

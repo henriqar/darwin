@@ -1,6 +1,8 @@
 
 import darwin
 
+fm = ((0, 1, 3), (1, 2), (6, 19), (2.1, 88))
+
 def Quadratic():
     return 10
 
@@ -25,4 +27,5 @@ opt.iterations = 10
 # exclusive required GA parameters
 opt.mutation_probability = 0.2
 
+opt.submitfile = 'sanity.submit'
 opt.start()

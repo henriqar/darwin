@@ -104,6 +104,7 @@ class ParticleUniverse():
         name = min(cls.__instances.items(), key=lambda x: x[1].fitness)[0]
         cls.global_fitness = cls.__instances[name].fitness
         cls.global_position = copy.deepcopy(cls.__instances[name].position)
+        # import pdb; pdb.set_trace()
 
     @classmethod
     def set_nullitems(cls, items):

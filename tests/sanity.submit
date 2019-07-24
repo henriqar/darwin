@@ -7,7 +7,7 @@
 [darwin]
 
 #executable=/bin/sleep
-executable=cos_cos
+executable=sanity
 
 # (TODO)
 # define the collector from htcondor to use

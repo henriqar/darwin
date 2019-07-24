@@ -1,3 +1,0 @@
-
-class bha:
-    pass

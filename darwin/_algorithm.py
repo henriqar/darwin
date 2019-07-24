@@ -182,20 +182,20 @@ class Algorithm():
     # BA specific information -------------------------------------------------
 
     @Setter
-    def f_min(self, value):
-        self.data.f_min = value
+    def min_frequency(self, value):
+        self.data.min_frequency = value
 
     @Setter
-    def f_max(self, value):
-        self.data.f_max = value
+    def max_frequency(self, value):
+        self.data.max_frequency = value
 
     @Setter
-    def A(self, value):
-        self.data.A = value
+    def loudness(self, value):
+        self.data.loudness = value
 
     @Setter
-    def r(self, value):
-        self.data.r = value
+    def pulse_rate(self, value):
+        self.data.pulse_rate = value
 
     # BSA specific information ------------------------------------------------
 
