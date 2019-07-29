@@ -11,9 +11,9 @@ import time
 import shutil
 import datetime
 
-from darwin._constants import drm
+import darwin.engine.particles as particles
 
-from darwin.engine.particles import ParticleUniverse
+from darwin.constants import drm
 
 logger = logging.getLogger(__name__)
 
@@ -61,55 +61,33 @@ def copyas(src, dst):
 
 class Executor(abc.ABC):
 
-    class ContextHandler():
+    class Context():
+        def __init__(self, iteration, config):
+            self.iteration = iteration
+            self.root = os.getcwd()
+            self.env = os.path.join(self.root, config.env)
+            self.optdir = os.path.join(self.root, config.optdir)
+            # self.iteration = 'initial'
 
-        def __init__(self, strategy, optdir='darwin.opt', env='darwin.exec'):
-            self._strategy = strategy
-            self._root = os.getcwd()
-            self._execdir = os.path.join(self._root, env)
-            self._optdir = os.path.join(self._root, optdir)
-            self._iteration = 'initial'
-
-        @property
-        def rootpath(self):
-            return self._root
-
-        @property
-        def execdirpath(self):
-            return self._execdir
-
-        @property
-        def optdirpath(self):
-            return self._optdir
+            if not os.path.exists(self.optdir):
+                logger.error('cannot find the optimization directory specified')
+                sys.exit(1)
 
         @property
         def iterationpath(self):
-            return os.path.join(self._execdir,
-                    'iteration_{}'.format(self._iteration))
-
-        @iterationpath.setter
-        def iterationpath(self, it):
-            self._iteration = it
+            return os.path.join(self.env, 'iteration_{}'.format(self.iteration))
 
         def particlepath(self, name):
             return os.path.join(self.iterationpath, name)
 
         def __enter__(self):
-            # create folders soft linking files to designated particle folders
-            for name in ParticleUniverse.names():
-                copyas(self._optdir, self.particlepath(name))
+            for p in particles.particles():
+                copyas(self.optdir, self.particlepath(p.name))
             return self
 
         def __exit__(self, *exec_details):
-            ParticleUniverse.evaluateall(self.iterationpath, self._strategy)
-
-    # define single instance (singleton)
-    _instance = None
-
-    def __new__(cls, *args, **kwargs):
-        if Executor._instance is None:
-            Executor._instance = super().__new__(cls)
-        return Executor._instance
+            # particles.evaluate(self.iterationpath, self.strategy)
+            pass
 
     def __init__(self, config):
 
@@ -119,71 +97,35 @@ class Executor(abc.ABC):
             sys.exit(1)
 
         # save the config
-        self._config = config
+        self.config = config
 
         # get the submit file for the darwin application
-        self._submitf = configparser.ConfigParser()
-        self._submitf.read(config.submitfile)
-
-        # create path object to handle multiple paths
-        self._handler = None
-
-        # save timeout for job
-        self._timeout = config.timeout
+        self.submitf = configparser.ConfigParser()
+        self.submitf.read(config.submitfile)
 
         # stretegy reference
-        self._strategy = None
+        self.strategy = None
 
-    def set_strategy(self, strategy):
-        self._strategy = strategy
+    def setStrategy(self, strategy):
+        self.strategy = strategy
 
     @abc.abstractmethod
-    def _core_optimization(self, handler, particles):
+    def _coreOptimization(self, handler, particles):
         raise NotImplementedError
 
     @exectime('Total optimization time is')
     def optimize(self):
-        # create path object to handle multiple paths
-        self._handler = Executor.ContextHandler(self._strategy,
-                optdir=self._config.optdir, env=self._config.execdir)
-        handler = self._handler
 
-        # get all particles as tuple
-        particles = ParticleUniverse.particles()
+        if os.path.exists(self.config.env) and  os.path.isdir(self.config.env):
+            shutil.rmtree(self.config.env, ignore_errors=True)
 
-        # register executor for every agent
-        self._strategy.initialize()
+        for iteration in self.strategy.iterations():
+            with Executor.Context(iteration, self.config) as handler:
+                self._coreOptimization(handler, particles.particles())
+                self.strategy.fitnessEvaluation()
+                particles.evaluate(handler.iterationpath, self.strategy)
 
-        # create all generators used inside the excution process
-        generator = self._strategy.generator()
 
-        if not os.path.exists(handler.optdirpath):
-            logger.error('an optdir containing all optimization files must be',
-                    ' provided')
-            sys.exit(1)
-
-        # create the opt dir and prepare the submit file
-        if os.path.exists(handler.execdirpath) and \
-                os.path.isdir(handler.execdirpath):
-            shutil.rmtree(handler.execdirpath, ignore_errors=True)
-
-        handler.iteration = 'initial'
-        with handler:
-            print('Evaluating random initialization of searchspace\n')
-            self._core_optimization(handler, particles)
-
-        # iteration = 0
-        finished = False
-        while not finished:
-
-            try:
-                handler.iterationpath = next(generator)
-            except StopIteration:
-                finished = True
-            else:
-                with handler:
-                    self._core_optimization(handler, particles)
-                # self._strategy.fitness_evaluation()
 
 
 

@@ -2,6 +2,10 @@
 import abc
 import logging
 
+from darwin.engine.particles import getBestFitness
+
+from itertools import chain
+
 logger = logging.getLogger(__name__)
 
 class Strategy():
@@ -14,10 +18,20 @@ class Strategy():
         raise NotImplementedError
 
     @abc.abstractmethod
-    def fitness_evaluation(self):
+    def fitnessEvaluation(self):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def generator(self):
-       raise NotImplementedError
+    def algorithm(self):
+        raise NotImplementedError
+
+    def iterations(self):
+        """
+        """
+        for v in chain(self.initialize(), self.algorithm()):
+            yield v
+
+        print('\nFINISHED - OK (minimum fitness value {})'.format(
+            getBestFitness()))
+
 

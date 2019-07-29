@@ -28,3 +28,11 @@ def factory(optm, *args, **kwargs):
             sys.exit(1)
 
     return instance
+
+def printHeader(iteration, fitness, elapsed_time):
+    print(' {:13s} {:20s} {:25s}'.format(
+        iteration, fitness, str(elapsed_time)))
+
+def printInfo(iteration, max_itrs, fitness, elapsed_time):
+    print(' {:<13d} {:<20f} {:<25s}'.format(
+        iteration, fitness, str(elapsed_time)))

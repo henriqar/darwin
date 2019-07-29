@@ -1,4 +1,5 @@
 
+import os
 import darwin
 
 def fitness():
@@ -12,11 +13,11 @@ opt = darwin.Algorithm(darwin.opt.GeneticAlgorithm)
 x = (-200,+200)
 y = (-1000,+1000)
 
-opt.add_parameter('x', x)
-opt.add_parameter('y', y)
+opt.addVariable('x', x)
+opt.addVariable('y', y)
 
 # define htcondor execution engine
-opt.exec_engine = darwin.drm.HTCondor
+opt.executionEngine = darwin.drm.HTCondor
 
 # default darwin parameters
 opt.function = fitness
@@ -24,7 +25,7 @@ opt.particles = 10
 opt.iterations = 10
 
 # exclusive required GA parameters
-opt.mutation_probability = 0.05
+opt.mutationProbability = 0.05
 
-opt.submitfile = 'sanity.submit'
+opt.submitFile = 'sanity.submit'
 opt.start()

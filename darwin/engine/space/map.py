@@ -1,9 +1,9 @@
 
 import copy
 import logging
+import math
 import numpy as np
-
-from darwin.dsl import DefaultFormatter
+import sys
 
 logger = logging.getLogger(__name__)
 
@@ -13,18 +13,13 @@ class Map(tuple):
         try:
             it = iter(data)
         except TypeError :
-            raise
+            logger.error('mapping must be a iterable type')
+            sys.exit(1)
         else:
             inst = tuple.__new__(Map, data)
             inst._discrete = discrete
-
-            if formatter is None:
-                logger.info('map formatter not set, fallback to default')
-                inst._formatter = DefaultFormatter()
-            else:
-                inst._formatter = formatter
-
-            return inst
+            inst._formatter = formatter
+        return inst
 
     def __copy__(self):
         cls = self.__class__
@@ -60,23 +55,28 @@ class Map(tuple):
         return self._discrete
 
     def format(self, idx):
-        return self._formatter.format(self[idx])
-
-    def uniform_random_element(self):
         if self._discrete:
-            return np.random.randint(0, len(self))
+            return self._formatter.format(self[math.floor(idx)])
+        else:
+            return self._formatter.format(idx)
+            # logger.error('formatter class is used only on discrete maps')
+            # sys.exit(1)
+
+    def uniformRandom(self):
+        if self._discrete:
+            return np.random.uniform(0, len(self))
         else:
             return np.random.uniform(self[0], self[-1])
 
-    def gaussian_random_element(self):
+    def gaussianRandom(self):
         if self._discrete:
             return np.random.normal(0, len(self))
         else:
             return np.random.normal(self[0], self[-1])
 
-    def cauchy_random_element(self):
+    def cauchyRandom(self):
         if self._discrete:
-            return round(np.random.standard_cauchy(0, len(self)))
+            return np.random.standard_cauchy(0, len(self))
         else:
             return np.random.standard_cauchy(self[0], self[-1])
 

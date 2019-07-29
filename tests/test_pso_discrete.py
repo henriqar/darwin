@@ -25,11 +25,11 @@ opt = darwin.Algorithm(darwin.opt.ParticleSwarmOptimization)
 map1 = (0,1,2,3)
 map2 = ('a', 'b', 'c', 'd')
 
-opt.add_parameter('map1', map1, discrete=True)
-opt.add_parameter('map2', map2, discrete=True)
+opt.addVariable('map1', map1, discrete=True)
+opt.addVariable('map2', map2, discrete=True)
 
 # define htcondor execution engine
-opt.exec_engine = darwin.drm.HTCondor
+opt.executionEngine = darwin.drm.HTCondor
 
 # default darwin parameters
 opt.function = fitness
@@ -41,5 +41,5 @@ opt.c1 = 1
 opt.c2 = 1
 opt.w = 0.5
 
-opt.submitfile = 'sanity_discrete.submit'
+opt.submitFile = 'sanity_discrete.submit'
 opt.start()

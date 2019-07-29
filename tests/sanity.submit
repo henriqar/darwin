@@ -14,7 +14,7 @@ executable=sanity
 collector=lsc.ic.unicamp.br
 
 # always refresh on 'x' seconds, default: 60
-refresh_rate=2
+refresh_rate=3
 
 # (TODO)
 # 1 execution medium time in seconds

@@ -25,11 +25,11 @@ opt = darwin.Algorithm(darwin.opt.BatAlgorithm)
 map1 = (0,1,2,3)
 map2 = ('a', 'b', 'c', 'd')
 
-opt.add_parameter('map1', map1, discrete=True)
-opt.add_parameter('map2', map2, discrete=True)
+opt.addVariable('map1', map1, discrete=True)
+opt.addVariable('map2', map2, discrete=True)
 
 # define htcondor execution engine
-opt.exec_engine = darwin.drm.HTCondor
+opt.executionEngine = darwin.drm.HTCondor
 
 # default darwin parameters
 opt.function = fitness
@@ -37,10 +37,10 @@ opt.particles = 10
 opt.iterations = 10
 
 # exclusive required GA parameters
-opt.max_frequency = 0.8
-opt.min_frequency = 0.3
-opt.pulse_rate = 0.9
+opt.maxFrequency = 0.8
+opt.minFrequency = 0.3
+opt.pulseRate = 0.9
 opt.loudness = 0.4
 
-opt.submitfile = 'sanity_discrete.submit'
+opt.submitFile = 'sanity_discrete.submit'
 opt.start()

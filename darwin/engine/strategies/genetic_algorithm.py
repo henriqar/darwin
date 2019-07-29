@@ -7,115 +7,86 @@ import sys
 import time
 
 from . import Strategy
+from . import printHeader, printInfo
 
-from darwin.engine.particles import ParticleUniverse
+import darwin.engine.space as universe
+import darwin.engine.particles as particles
 
 logger = logging.getLogger(__name__)
 
-def header_output(iteration, fitness, elapsed_time):
-    print(' {:13s} {:20s} {:25s}'.format(
-        iteration, fitness, str(elapsed_time)))
-
-def info_output(iteration, max_itrs, fitness, elapsed_time):
-    print(' {:<13d} {:<20f} {:<25s}'.format(
-        iteration, fitness, str(elapsed_time)))
-
 class GeneticAlgorithm(Strategy):
 
-    def _roulette_selection(self, population, k):
+    def _rouletteSelection(self, population):
+        k = len(population)
         maximum = sum([c.fitness for c in population])
         selection_probs = [c.fitness/maximum for c in population]
-        return np.random.choice(len(population), p=selection_probs, size=k)
+        return np.random.choice(k, p=selection_probs, size=k)
 
     def initialize(self):
-
         r = ('mutation_probability',)
         self.data.hasrequired(r)
+        for particle in particles.particles():
+            particle.coordinate.uniformRandom()
+        yield 'initial'
 
-        for p in ParticleUniverse.particles():
-            for pos in p.position:
-                pos.uniform_random()
-
-    def fitness_evaluation(self):
-        for p in ParticleUniverse.particles():
+    def fitnessEvaluation(self):
+        for p in particles.particles():
             if p.intermediate < p.fitness:
                 p.fitness = p.intermediate
 
-    def generator(self):
+    def algorithm(self):
 
-        # import pdb; pdb.set_trace()
-        particles = ParticleUniverse.particles()
-        m = len(particles)
-        n = particles[0].n
+        m = len(particles.particles())
+        lp = particles.particles()
         data = self.data
 
         tmp = []
-        for p in particles:
-            tmp.append(ParticleUniverse.nullitems())
+        for _ in particles.particles():
+            tmp.append(universe.getOrigin())
 
         # create the table of info
-        header_output('Iteration', 'Fitness', 'Elapsed')
+        printHeader('Iteration', 'Fitness', 'Elapsed')
 
-        for t in range(data.iterations):
+        dimension = universe.dimension()
+        for iteration in range(data.iterations):
 
-            for idx, agent in enumerate(particles):
+            selection = self._rouletteSelection(particles.particles())
+            for p in range(0, math.floor(m/2), 2):
+                crossover_index = math.floor(np.random.uniform(high=dimension))
+                for k in range(dimension):
+                    if k < crossover_index:
+                        tmp[p][k] = lp[selection[p]][k]
+                        tmp[p+1][k] = lp[selection[p+1]][k]
+                    else:
+                        tmp[p][k] = lp[selection[p+1]][k]
+                        tmp[p+1][k] = lp[selection[p]][k]
 
-		# It performs the selectione
-                selection = self._roulette_selection(particles, m)
+            if m % 2 == 0:
+                cross_index = math.floor(np.random.uniform(high=dimension))
+                for k in range(dimension):
+                    if k < cross_index:
+                        tmp[m-1][k]= lp[selection[m-1]][k]
+                    else:
+                        tmp[m-1][k]= lp[selection[0]][k]
 
-                # perform the crossover
-                for p in range(0, math.floor(m/2), 2):
+            # It performs the mutation
+            for coord in tmp:
+                if np.random.uniform(0, 1) <= data.mutation_probability:
+                    index = math.floor(np.random.uniform(high=dimension))
+                    coord.uniformRandom(index)
 
-                    crossover_index = np.random.uniform(0, m)
-                    for k in range(n):
+            # changes the generation
+            for j in range(m):
+                lp[j].position(tmp[j])
 
-                        if k < crossover_index:
-                            tmp[p][k].holding = particles[selection[p]][k].holding
-                            tmp[p+1][k].holding = particles[selection[p+1]][k].holding
-                        else:
-                            tmp[p][k].holding = particles[selection[p+1]][k].holding
-                            tmp[p+1][k].holding = particles[selection[p]][k].holding
-
-                if m % 2 == 0:
-
-                    crossover_index = np.random.uniform(0, n)
-
-                    for k in range(n):
-
-                        if k < crossover_index:
-                            tmp[m-1][k].holding = particles[selection[m-1]][k].holding
-                        else:
-                            tmp[m-1][k].holding = particles[selection[0]][k].holding
-
-		# It performs the mutation
-                for j in range(m):
-
-                    if np.random.uniform(0, 1) <= data.mutation_probability:
-
-                        mutation_index = np.random.randint(0, n)
-                        particles[j][mutation_index].uniform_random()
-                        tmp[idx][mutation_index].holding = particles[j][mutation_index].holding
-                        # tmp[idx][mutation_index].holding = particles[j][mutation_index].uniform_random()
-
-                # changes the generation
-                # import pdb; pdb.set_trace()
-                for j in range(m):
-                    for k in range(n):
-                        particles[j][k].holding = tmp[j][k].holding
-
-            # get the time elapsed
             start_time = time.time()
-
-            # create a generator using yield
-            yield t
-
-            # get the end time
+            yield iteration
             elapsed_time = time.time() - start_time
 
             # information output
-            info_output(t, data.iterations, ParticleUniverse.global_fitness,
+            printInfo(iteration,
+                    self.data.iterations,
+                    particles.getBestFitness(),
                     datetime.timedelta(seconds=elapsed_time))
 
-        print('\nFINISHED - OK (minimum fitness value {})'.format(
-            ParticleUniverse.global_fitness))
 

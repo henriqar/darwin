@@ -14,6 +14,7 @@ class _Constants:
 
 drm = _Constants()
 opt = _Constants()
+cooling = _Constants()
 
 drm.Local = 'Local'        # TODO
 drm.HTCondor = 'HTCondor'
@@ -38,6 +39,9 @@ opt.OPT = 'OPT'
 opt.ParticleSwarmOptimization = 'ParticleSwarmOptimization'
 opt.SimulatedAnnealing = 'SimulatedAnnealing'
 opt.WCA = 'WCA'
+
+cooling.BoltzmannAnnealing = 'BoltzmannAnnealing'
+cooling.FastAnnealing = 'FastAnnealing'
 
     # _LOCAL = 0
     # _HTCONDOR = 1

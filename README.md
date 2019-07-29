@@ -13,7 +13,7 @@ First you need to install the module's requirements
 ```bash 
 $ pip install -r requirements.txt
 ```
-> Note that `htcondor` module maybe unavailable in some plataforms.
+> Note that `htcondor` module may be unavailable in some plataforms.
 
 After all requirements are installed, you just need to enter the directory and execute
 ```bash
@@ -21,11 +21,13 @@ $ pip install .
 ```
 or 
 ```bash
-$ python3.5 setup.py install
+$ python3 setup.py install
 ```
 ## Features
 Optimization algorithms supported in current version:
 - Genetic Algorithm
+- Particle Swarm Optimization
+- Bat Algorithm
 
 Execution backends implemented:
 - HTCondor cluster execution

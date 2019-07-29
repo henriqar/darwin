@@ -5,10 +5,12 @@ from .particle import Particle
 
 logger = logging.getLogger(__name__)
 
-class MigratingBirdsOptimization(Particle):
+class SimulatedAnnealing(Particle):
     def __init__(self):
         super().__init__()
 
         # augmented parameters
-        self.nb = None
+        UB = 0
+        LB = 0
+
 

@@ -17,45 +17,34 @@ logger = logging.getLogger(__name__)
 
 # context in strategy pattern
 class HTCondor(Executor):
-
     def __init__(self, config):
-
-        # call super constructor
         super().__init__(config)
-
         try:
-            self._refresh_rate = int(self._submitf['darwin']['refresh_rate'])
+            self.refresh_rate = int(self.submitf['darwin']['refresh_rate'])
         except (KeyError, NoSectionError, NoOptionError) as e:
-            # default refresh in seconds
-            self._refresh_rate = 60
+            self.refresh_rate = 60
             logging.warning('refresh_rate not find, fallback to default: 60s')
 
-    def _core_optimization(self, handler, particles):
-
+    def _coreOptimization(self, handler, particles):
         schedd = htcondor.Schedd()
-
-        # config parser handler
-        conf = self._submitf
+        conf = self.submitf
 
         executable = conf['darwin']['executable']
-        conf['htcondor']['executable'] = os.path.join(handler.optdirpath,
-                executable)
+        executable_path = os.path.join(handler.optdir, executable)
+        conf['htcondor']['executable'] = executable_path
+        if not os.path.exists(executable_path):
+            logger.error('executable "{}" not found'.format(executable_path))
+            sys.exit(1)
 
         # secure the job id from condor
         ids = []
         for p in particles:
-
-            values = []
-            for pos in p.position:
-                arg = '-{} {}'.format(pos.name, pos.format())
-                values.append(arg)
-
-            conf['htcondor']['arguments'] = ' '.join(values)
+            arguments = p.coordinate.format()
+            conf['htcondor']['arguments'] = arguments
             conf['htcondor']['initialdir'] = handler.particlepath(p.name)
 
             # get redirect of htcondor submit file to a dict
             sub = htcondor.Submit(dict(conf.items('htcondor')))
-
             with schedd.transaction() as txn:
                 ads = []
                 clusterid = sub.queue(txn, ad_results=ads)
@@ -63,21 +52,25 @@ class HTCondor(Executor):
                 # self._schedd.spool(ads)
 
         req = ' || '.join('(ClusterId == {})'.format(id) for id in ids)
-        finished = False
-        while not finished:
+        proj = ['ClusterId', 'JobStatus']
+        for data in schedd.xquery(requirements=req, projection=proj):
+            time.sleep(self.refresh_rate)
 
-            # query schedd for all job procs
-            query = schedd.xquery(
-                    requirements=req,
-                    projection=['ClusterId', 'JobStatus'])
+        # finished = False
+        # while not finished:
 
-            try:
-                data = next(query)
-            except StopIteration:
-                finished = True
-            else:
-                # wait to probe condor again
-                time.sleep(self._refresh_rate)
+        #     # query schedd for all job procs
+        #     query = schedd.xquery(
+        #             requirements=req,
+        #             projection=['ClusterId', 'JobStatus'])
+
+        #     try:
+        #         data = next(query)
+        #     except StopIteration:
+        #         finished = True
+        #     else:
+        #         # wait to probe condor again
+        #         time.sleep(self.refresh_rate)
 
     #             # call retrieve ads from htcondor in this directory
     #             # self._schedd.retrieve("ClusterId == %d".format(clusterid))

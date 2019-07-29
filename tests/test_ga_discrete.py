@@ -25,11 +25,11 @@ opt = darwin.Algorithm(darwin.opt.GeneticAlgorithm)
 map1 = (0,1,2,3)
 map2 = ('a', 'b', 'c', 'd')
 
-opt.add_parameter('map1', map1, discrete=True)
-opt.add_parameter('map2', map2, discrete=True)
+opt.addVariable('map1', map1, discrete=True)
+opt.addVariable('map2', map2, discrete=True)
 
 # define htcondor execution engine
-opt.exec_engine = darwin.drm.HTCondor
+opt.executionEngine = darwin.drm.HTCondor
 
 # default darwin parameters
 opt.function = fitness
@@ -37,7 +37,7 @@ opt.particles = 10
 opt.iterations = 10
 
 # exclusive required GA parameters
-opt.mutation_probability = 0.2
+opt.mutationProbability = 0.2
 
-opt.submitfile = 'sanity_discrete.submit'
+opt.submitFile = 'sanity_discrete.submit'
 opt.start()

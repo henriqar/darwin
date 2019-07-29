@@ -1,9 +1,15 @@
 
+import os
 import darwin
 
 def fitness():
-    with open('output.txt') as fp:
-        return float(fp.read())
+    print('inside: ' + str(os.getcwd()))
+    try:
+        print(os.path.exists('output.txt'))
+        with open('output.txt') as fp:
+            return float(fp.read())
+    except Exception as e:
+        import pdb; pdb.set_trace()
 
 # get the algorithm to gbe used for the op[timization
 opt = darwin.Algorithm(darwin.opt.ParticleSwarmOptimization)
@@ -12,11 +18,11 @@ opt = darwin.Algorithm(darwin.opt.ParticleSwarmOptimization)
 x = (-200,+200)
 y = (-1000,+1000)
 
-opt.add_parameter('x', x)
-opt.add_parameter('y', y)
+opt.addVariable('x', x)
+opt.addVariable('y', y)
 
 # define htcondor execution engine
-opt.exec_engine = darwin.drm.HTCondor
+opt.executionEngine = darwin.drm.HTCondor
 
 # default darwin parameters
 opt.function = fitness
@@ -28,5 +34,5 @@ opt.c1 = 1
 opt.c2 = 1
 opt.w = 0.5
 
-opt.submitfile = 'sanity.submit'
+opt.submitFile = 'sanity.submit'
 opt.start()
