@@ -47,6 +47,12 @@ def dimension():
     """
     return _universe.dimension
 
+def variable(idx):
+    if _universe is None:
+        logger.error('universe must be initialized with a bigBang')
+        sys.exit(1)
+    return _universe[idx]
+
 def expand():
     """
     Expand function will expand the universe with all variables and groups

@@ -439,11 +439,11 @@ class Algorithm():
     # SA specific information -------------------------------------------------
 
     @Setter
-    def initial_temperature(self, value):
+    def initialTemperature(self, value):
         self.data.initial_temperature = value
 
     @Setter
-    def final_temperature(self, value):
+    def finalTemperature(self, value):
         self.data.final_temperature = value
 
     # WCA specific information ------------------------------------------------

@@ -3,9 +3,7 @@ import os
 import darwin
 
 def fitness():
-    print('inside: ' + str(os.getcwd()))
     try:
-        print(os.path.exists('output.txt'))
         with open('output.txt') as fp:
             return float(fp.read())
     except Exception as e:

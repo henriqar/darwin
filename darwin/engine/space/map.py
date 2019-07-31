@@ -59,8 +59,6 @@ class Map(tuple):
             return self._formatter.format(self[math.floor(idx)])
         else:
             return self._formatter.format(idx)
-            # logger.error('formatter class is used only on discrete maps')
-            # sys.exit(1)
 
     def uniformRandom(self):
         if self._discrete:

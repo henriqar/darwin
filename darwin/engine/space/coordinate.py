@@ -32,6 +32,9 @@ class Coordinate():
     def __setitem__(self, item, value):
         self._points[item] = value
 
+    def __len__(self):
+        return len(self._points)
+
     def set(self, points):
         assert isinstance(points, (tuple, list))
         self._points = copy.deepcopy(points)
@@ -51,6 +54,14 @@ class Coordinate():
             elif secure > ref.map.ub:
                 secure = ref.map.ub
             self._points[point] = secure
+
+    def lb(self, idx):
+        _, ref = Coordinate.__universe.axes()[idx]
+        return ref.map.lb
+
+    def ub(self, idx):
+        _, ref = Coordinate.__universe.axes()[idx]
+        return ref.map.ub
 
     def uniformRandom(self, idx=None):
         if idx is None:

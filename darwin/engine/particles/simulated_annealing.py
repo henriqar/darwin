@@ -10,7 +10,7 @@ class SimulatedAnnealing(Particle):
         super().__init__()
 
         # augmented parameters
-        UB = 0
-        LB = 0
+        self.UB = []
+        self.LB = []
 
 
