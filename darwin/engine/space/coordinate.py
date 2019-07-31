@@ -35,6 +35,13 @@ class Coordinate():
     def __len__(self):
         return len(self._points)
 
+    def __repr__(self):
+        arguments = []
+        for i, ref in Coordinate.__universe.axes():
+            p = self._points[i]
+            arguments.append('{}: {}\n'.format(ref.name, ref.map.format(p)))
+        return ' '.join(arguments)
+
     def set(self, points):
         assert isinstance(points, (tuple, list))
         self._points = copy.deepcopy(points)
@@ -106,16 +113,25 @@ class Coordinate():
             return list(map(lambda x: x+other, self._points))
 
     def __sub__(self, other):
-        return list(map(sub, self._points, other))
+        c = Coordinate()
+        c.set(list(map(sub, self._points, other._points)))
+        return c
 
     def __rsub__(self, other):
-        if other == 0:
-            return self._points
-        else:
-            return list(map(lambda x: x-other, self._points))
+        c = Coordinate()
+        c.set(list(map(sub, other._points, self._points)))
+        return c
 
     def __mul__(self, other):
-        pass
+        raise NotImplementedError
+
+    def __rmul__(self, other):
+        c = Coordinate()
+        if isinstance(other, (int, float)):
+            c.set(list(map(lambda x: other*x, self._points)))
+        else:
+            raise NotImplementedError
+        return c
 
     def __floordiv__(self, other):
         pass

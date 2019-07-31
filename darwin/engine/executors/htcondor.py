@@ -53,25 +53,20 @@ class HTCondor(Executor):
 
         req = ' || '.join('(ClusterId == {})'.format(id) for id in ids)
         proj = ['ClusterId', 'JobStatus']
-        for data in schedd.xquery(requirements=req, projection=proj):
-            time.sleep(self.refresh_rate)
 
-        # finished = False
-        # while not finished:
+        finished = False
+        while not finished:
+            count = 0
+            for data in schedd.xquery(requirements=req, projection=proj):
+                count += 1
+            if count == 0:
+                finished = True
+            else:
+                time.sleep(self.refresh_rate)
 
-        #     # query schedd for all job procs
-        #     query = schedd.xquery(
-        #             requirements=req,
-        #             projection=['ClusterId', 'JobStatus'])
+        if 'should_transfer_files' in conf['htcondor'] and \
+                conf['htcondor']['should_transfer_files'] in ('YES',):
+            for clusterid in ids:
+                self._schedd.retrieve("ClusterId == %d".format(clusterid))
 
-        #     try:
-        #         data = next(query)
-        #     except StopIteration:
-        #         finished = True
-        #     else:
-        #         # wait to probe condor again
-        #         time.sleep(self.refresh_rate)
-
-    #             # call retrieve ads from htcondor in this directory
-    #             # self._schedd.retrieve("ClusterId == %d".format(clusterid))
 

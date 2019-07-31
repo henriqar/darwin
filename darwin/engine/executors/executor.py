@@ -123,7 +123,7 @@ class Executor(abc.ABC):
             with Executor.Context(iteration, self.config) as handler:
                 self._coreOptimization(handler, particles.particles())
                 particles.evaluate(handler.iterationpath, self.strategy)
-                self.strategy.fitnessEvaluation()
+                # self.strategy.fitnessEvaluation()
 
 
 

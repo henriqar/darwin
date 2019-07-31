@@ -25,7 +25,7 @@ _particle_pool = collections.OrderedDict()
 Define the global values used to classify the particles defined in this package
 """
 _global_fitness = sys.maxsize
-_global_best_coordinate = None
+_global_coordinate = None
 _global_eval_function = None
 
 @contextlib.contextmanager
@@ -59,17 +59,21 @@ def _factory(optm):
     # global _particle_pool
     _particle_pool[instance.name] = instance
 
-def _updateGlobalFitness():
-    """
-    Update the global fitness and coordinate if any particle performed better
-    than the global result.
-    """
-    particle = min(_particle_pool.values(), key=lambda x: x.fitness)
-    global _global_fitness
-    if particle.fitness < _global_fitness:
-        global _global_best_coordinate
-        _global_fitness = particle.fitness
-        _global_best_coordinate = copy.deepcopy(particle.coordinate)
+# def _updateGlobalFitness(strategy):
+#     """
+#     Update the global fitness and coordinate if any particle performed better
+#     than the global result.
+#     """
+#     global _global_fitness
+#     global _global_coordinate
+#     _global_fitness, _global_coordinate = \
+#             strategy.globalEvaluation(_global_fitness, _global_coordinate)
+# particle = min(_particle_pool.values(), key=lambda x: x.fitness)
+# global _global_fitness
+# if particle.fitness < _global_fitness:
+#     global _global_coordinate
+#     _global_fitness = particle.fitness
+#     _global_coordinate = copy.deepcopy(particle.coordinate)
 
 def setEvaluationFunction(func):
     """
@@ -104,8 +108,11 @@ def evaluate(root, strategy):
             particle.intermediate = fitness
 
     # after evaluating, update global fitness
-    strategy.fitnessEvaluation()
-    _updateGlobalFitness()
+    global _global_fitness
+    global _global_coordinate
+    strategy.evaluation()
+    _global_fitness, _global_coordinate = \
+            strategy.globalEvaluation(_global_fitness, _global_coordinate)
 
 def particles():
     """
@@ -124,5 +131,5 @@ def getBestCoordinate():
     """
     Return the best fitness of all particles at the moment of calling.
     """
-    return copy.deepcopy(_global_best_coordinate)
+    return copy.deepcopy(_global_coordinate)
 

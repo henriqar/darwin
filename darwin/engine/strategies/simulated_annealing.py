@@ -59,7 +59,7 @@ class SimulatedAnnealing(Strategy):
 
         yield 'initial'
 
-    def fitnessEvaluation(self):
+    def evaluation(self):
         if self.init:
             self.init = False
             for p in particles.particles():
