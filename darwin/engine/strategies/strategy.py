@@ -41,9 +41,9 @@ class Strategy():
 
         print('\nFINISHED - OK (minimum fitness value {})'.format(
             particles.getBestFitness()))
-        print('\nBest universe coordinate found:\n {}'.format(
+        print('\nBest universe coordinate found:\n\n{}\n'.format(
             particles.getBestCoordinate()))
-        logger.info('\nBest universe coordinate found:\n {}'.format(
+        logger.info('\nBest universe coordinate found:\n\n{}\n'.format(
             particles.getBestCoordinate()))
 
 

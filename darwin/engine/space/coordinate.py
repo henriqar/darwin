@@ -2,8 +2,9 @@
 import copy
 import logging
 import sys
+import math
 
-from operator import add
+from operator import add, sub
 
 logger = logging.getLogger(__name__)
 
@@ -39,8 +40,8 @@ class Coordinate():
         arguments = []
         for i, ref in Coordinate.__universe.axes():
             p = self._points[i]
-            arguments.append('{}: {}\n'.format(ref.name, ref.map.format(p)))
-        return ' '.join(arguments)
+            arguments.append('{}: {}'.format(ref.name, ref.map.format(p)))
+        return '\n'.join(arguments)
 
     def set(self, points):
         assert isinstance(points, (tuple, list))
@@ -69,6 +70,10 @@ class Coordinate():
     def ub(self, idx):
         _, ref = Coordinate.__universe.axes()[idx]
         return ref.map.ub
+
+    def euclideanDistance(self, other):
+        diffs = sum([(x-y)**2 for x,y in zip(self._points, other._points)])
+        return math.sqrt(diffs)
 
     def uniformRandom(self, idx=None):
         if idx is None:
