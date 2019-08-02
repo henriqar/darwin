@@ -1,5 +1,6 @@
 
 import darwin
+import os
 
 fm = {
     'a': (10, 20, 1000, 1.2),
@@ -16,14 +17,11 @@ def fitness():
         fp.readline()
         line = fp.readline()
         letter = line.strip()
-        print(number)
-        print(letter)
-        print('--')
 
         return fm[letter][number]
 
 # get the algorithm to gbe used for the op[timization
-opt = darwin.Algorithm(darwin.opt.BatAlgorithm)
+opt = darwin.Algorithm(darwin.opt.GeneticAlgorithm)
 
 # define the mapping parameters used
 map1 = (0,1,2,3)
@@ -33,18 +31,16 @@ opt.addVariable('map1', map1, discrete=True)
 opt.addVariable('map2', map2, discrete=True)
 
 # define htcondor execution engine
-opt.executionEngine = darwin.drm.HTCondor
+opt.executionEngine = darwin.drm.TaskSpooler
 
 # default darwin parameters
 opt.function = fitness
 opt.particles = 10
 opt.iterations = 10
+opt.parallelJobs = 4
 
 # exclusive required GA parameters
-opt.maxFrequency = 0.8
-opt.minFrequency = 0.3
-opt.pulseRate = 0.9
-opt.loudness = 0.4
+opt.mutationProbability = 0.2
 
 opt.submitFile = 'sanity_discrete.submit'
 opt.start()

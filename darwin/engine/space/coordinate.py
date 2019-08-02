@@ -37,11 +37,11 @@ class Coordinate():
         self._points = copy.deepcopy(points)
 
     def format(self):
-        arguments = []
+        arguments = {}
         for i, ref in Coordinate.__universe.axes():
             p = self._points[i]
-            arguments.append('-{} {}'.format(ref.name, ref.map.format(p)))
-        return ' '.join(arguments)
+            arguments[ref.name] = '{}'.format(ref.map.format(p))
+        return arguments
 
     def inbounds(self):
         for point, ref in Coordinate.__universe.axes():

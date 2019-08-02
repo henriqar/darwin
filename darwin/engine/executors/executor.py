@@ -2,7 +2,6 @@
 import abc
 import configparser
 import collections
-import htcondor
 import logging
 import os
 import shutil

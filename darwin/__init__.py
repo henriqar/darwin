@@ -81,20 +81,17 @@ class Algorithm():
 
         self.data = Data()
         self.data.iterations = 10
-        self.data.executor = drm.Local
+        self.data.executor = drm.TaskSpooler
 
         self.config = Data()
-        self.config.timeout = None
-        self.config.parallelism = 3600
+        self.config.timeout = 3600
+        self.config.parallelism = 1
         self.config.submitfile = 'darwin.submit'
         self.config.optdir = 'darwin.opt'
         self.config.env = 'darwin.exec'
 
         # create the solution space
         universe.bigBang()
-
-        # define the execution engine
-        self._executor = drm.Local
 
         if hasattr(opt, algorithm):
             self.data.optimization = algorithm

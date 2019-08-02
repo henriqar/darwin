@@ -16,7 +16,7 @@ drm = _Constants()
 opt = _Constants()
 cooling = _Constants()
 
-drm.Local = 'Local'        # TODO
+drm.TaskSpooler = 'TaskSpooler'
 drm.HTCondor = 'HTCondor'
 
 opt.ABC = 'ABC'

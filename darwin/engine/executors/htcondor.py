@@ -40,7 +40,8 @@ class HTCondor(Executor):
         ids = []
         for p in particles:
             arguments = p.coordinate.format()
-            conf['htcondor']['arguments'] = arguments
+            formatted_args = ['-{} {}'.format(k, v) for k,v in arguments.items()]
+            conf['htcondor']['arguments'] = ' '.join(formatted_args)
             conf['htcondor']['initialdir'] = handler.particlepath(p.name)
 
             # get redirect of htcondor submit file to a dict
