@@ -1,8 +1,10 @@
 
 import abc
 import logging
+import copy
 
-from darwin.engine.particles import getBestFitness
+# from darwin.engine.particles import getBestFitness, getBestCoordinate
+import darwin.engine.particles as particles
 
 from itertools import chain
 
@@ -18,12 +20,18 @@ class Strategy():
         raise NotImplementedError
 
     @abc.abstractmethod
-    def fitnessEvaluation(self):
+    def evaluation(self):
         raise NotImplementedError
 
     @abc.abstractmethod
     def algorithm(self):
         raise NotImplementedError
+
+    def globalEvaluation(self, gfit, gcoord):
+        particle = min(particles.particles(), key=lambda x: x.fitness)
+        if particle.fitness < gfit:
+            return (particle.fitness, copy.deepcopy(particle.coordinate))
+        return (gfit, gcoord)
 
     def iterations(self):
         """
@@ -32,6 +40,10 @@ class Strategy():
             yield v
 
         print('\nFINISHED - OK (minimum fitness value {})'.format(
-            getBestFitness()))
+            particles.getBestFitness()))
+        print('\nBest universe coordinate found:\n\n{}\n'.format(
+            particles.getBestCoordinate()))
+        logger.info('\nBest universe coordinate found:\n\n{}\n'.format(
+            particles.getBestCoordinate()))
 
 

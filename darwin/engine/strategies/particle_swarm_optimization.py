@@ -25,7 +25,7 @@ class ParticleSwarmOptimization(Strategy):
             p.coordinate.uniformRandom()
         yield 'initial'
 
-    def fitnessEvaluation(self):
+    def evaluation(self):
         for p in particles.particles():
             if p.intermediate < p.fitness:
                 p.fitness = p.intermediate

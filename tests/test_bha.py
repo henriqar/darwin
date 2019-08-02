@@ -1,13 +1,15 @@
 
-import os
 import darwin
 
 def fitness():
-    with open('output.txt') as fp:
-        return float(fp.read())
+    try:
+        with open('output.txt') as fp:
+            return float(fp.read())
+    except:
+        import pdb; pdb.set_trace()
 
 # get the algorithm to gbe used for the op[timization
-opt = darwin.Algorithm(darwin.opt.GeneticAlgorithm)
+opt = darwin.Algorithm(darwin.opt.BlackHoleAlgorithm)
 
 # define the mapping parameters used
 x = (-200,+200)
@@ -22,10 +24,7 @@ opt.executionEngine = darwin.drm.HTCondor
 # default darwin parameters
 opt.function = fitness
 opt.particles = 10
-opt.iterations = 20
-
-# exclusive required GA parameters
-opt.mutationProbability = 0.05
+opt.iterations = 10
 
 opt.submitFile = 'sanity.submit'
 opt.start()

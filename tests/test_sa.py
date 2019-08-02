@@ -3,11 +3,14 @@ import os
 import darwin
 
 def fitness():
-    with open('output.txt') as fp:
-        return float(fp.read())
+    try:
+        with open('output.txt') as fp:
+            return float(fp.read())
+    except Exception as e:
+        import pdb; pdb.set_trace()
 
 # get the algorithm to gbe used for the op[timization
-opt = darwin.Algorithm(darwin.opt.GeneticAlgorithm)
+opt = darwin.Algorithm(darwin.opt.SimulatedAnnealing)
 
 # define the mapping parameters used
 x = (-200,+200)
@@ -22,10 +25,11 @@ opt.executionEngine = darwin.drm.HTCondor
 # default darwin parameters
 opt.function = fitness
 opt.particles = 10
-opt.iterations = 20
+opt.iterations = 30
 
 # exclusive required GA parameters
-opt.mutationProbability = 0.05
+opt.initialTemperature = 1
+opt.finalTemperature = 2
 
 opt.submitFile = 'sanity.submit'
 opt.start()

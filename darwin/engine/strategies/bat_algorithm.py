@@ -38,7 +38,7 @@ class BatAlgorithm(Strategy):
 
         yield 'initial'
 
-    def fitnessEvaluation(self):
+    def evaluation(self):
         for p in particles.particles():
             prob = np.random.uniform(0, 1)
             if p.intermediate < p.fitness and prob < p.loudness:

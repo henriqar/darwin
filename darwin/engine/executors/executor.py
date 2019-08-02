@@ -121,8 +121,8 @@ class Executor(abc.ABC):
         for iteration in self.strategy.iterations():
             with Executor.Context(iteration, self.config) as handler:
                 self._coreOptimization(handler, particles.particles())
-                self.strategy.fitnessEvaluation()
                 particles.evaluate(handler.iterationpath, self.strategy)
+                # self.strategy.fitnessEvaluation()
 
 
 

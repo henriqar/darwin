@@ -2,8 +2,9 @@
 import copy
 import logging
 import sys
+import math
 
-from operator import add
+from operator import add, sub
 
 logger = logging.getLogger(__name__)
 
@@ -32,6 +33,16 @@ class Coordinate():
     def __setitem__(self, item, value):
         self._points[item] = value
 
+    def __len__(self):
+        return len(self._points)
+
+    def __repr__(self):
+        arguments = []
+        for i, ref in Coordinate.__universe.axes():
+            p = self._points[i]
+            arguments.append('{}: {}'.format(ref.name, ref.map.format(p)))
+        return '\n'.join(arguments)
+
     def set(self, points):
         assert isinstance(points, (tuple, list))
         self._points = copy.deepcopy(points)
@@ -51,6 +62,18 @@ class Coordinate():
             elif secure > ref.map.ub:
                 secure = ref.map.ub
             self._points[point] = secure
+
+    def lb(self, idx):
+        _, ref = Coordinate.__universe.axes()[idx]
+        return ref.map.lb
+
+    def ub(self, idx):
+        _, ref = Coordinate.__universe.axes()[idx]
+        return ref.map.ub
+
+    def euclideanDistance(self, other):
+        diffs = sum([(x-y)**2 for x,y in zip(self._points, other._points)])
+        return math.sqrt(diffs)
 
     def uniformRandom(self, idx=None):
         if idx is None:
@@ -95,16 +118,25 @@ class Coordinate():
             return list(map(lambda x: x+other, self._points))
 
     def __sub__(self, other):
-        return list(map(sub, self._points, other))
+        c = Coordinate()
+        c.set(list(map(sub, self._points, other._points)))
+        return c
 
     def __rsub__(self, other):
-        if other == 0:
-            return self._points
-        else:
-            return list(map(lambda x: x-other, self._points))
+        c = Coordinate()
+        c.set(list(map(sub, other._points, self._points)))
+        return c
 
     def __mul__(self, other):
-        pass
+        raise NotImplementedError
+
+    def __rmul__(self, other):
+        c = Coordinate()
+        if isinstance(other, (int, float)):
+            c.set(list(map(lambda x: other*x, self._points)))
+        else:
+            raise NotImplementedError
+        return c
 
     def __floordiv__(self, other):
         pass
