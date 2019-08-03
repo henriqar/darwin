@@ -1,36 +1,54 @@
 
-import os
+import numpy as np
 import darwin
+import pytest
 
-def fitness():
-    try:
-        with open('output.txt') as fp:
-            return float(fp.read())
-    except Exception as e:
-        import pdb; pdb.set_trace()
-
-# get the algorithm to gbe used for the op[timization
-opt = darwin.Algorithm(darwin.opt.ParticleSwarmOptimization)
+@pytest.fixture
+def supplyPSO():
+    pso = darwin.Algorithm(darwin.opt.ParticleSwarmOptimization)
+    pso.c1 = np.random.uniform(0, 1)
+    pso.c2 = np.random.uniform(0, 1)
+    pso.w = np.random.uniform(0, 1)
+    pso.particles = np.random.randint(5, 20)
+    pso.iterations = np.random.randint(5, 15)
+    return pso
 
 # define the mapping parameters used
 x = (-200,+200)
 y = (-1000,+1000)
 
-opt.addVariable('x', x)
-opt.addVariable('y', y)
+# discrete used
+map1 = (0,1,2,3)
+map2 = ('a', 'b', 'c', 'd')
 
-# define htcondor execution engine
-opt.executionEngine = darwin.drm.HTCondor
+def test_htcondor_pso(supplyPSO, supplyFitnessFunction):
+    supplyPSO.executionEngine = darwin.drm.HTCondor
+    supplyPSO.addVariable('x', x)
+    supplyPSO.addVariable('y', y)
+    supplyPSO.function = supplyFitnessFunction
+    supplyPSO.submitFile = 'sanity.submit'
+    supplyPSO.start()
 
-# default darwin parameters
-opt.function = fitness
-opt.particles = 10
-opt.iterations = 10
+def test_htcondor_discrete_pso(supplyPSO, supplyDiscreteFitnessFunction):
+    supplyPSO.executionEngine = darwin.drm.HTCondor
+    supplyPSO.addVariable('map1', map1, discrete=True)
+    supplyPSO.addVariable('map2', map2, discrete=True)
+    supplyPSO.function = supplyDiscreteFitnessFunction
+    supplyPSO.submitFile = 'sanity_discrete.submit'
+    supplyPSO.start()
 
-# exclusive required GA parameters
-opt.c1 = 1
-opt.c2 = 1
-opt.w = 0.5
+def test_local_pso(supplyPSO):
+    supplyPSO.executionEngine = darwin.drm.TaskSpooler
+    supplyPSO.addVariable('x', x)
+    supplyPSO.addVariable('y', y)
+    supplyPSO.function = supplyFitnessFunction
+    supplyPSO.submitFile = 'sanity.submit'
+    supplyPSO.start()
 
-opt.submitFile = 'sanity.submit'
-opt.start()
+def test_local_discrete_pso(supplyPSO, supplyDiscreteFitnessFunction):
+    supplyPSO.executionEngine = darwin.drm.TaskSpooler
+    supplyPSO.addVariable('map1', map1, discrete=True)
+    supplyPSO.addVariable('map2', map2, discrete=True)
+    supplyPSO.function = supplyDiscreteFitnessFunction
+    supplyPSO.submitFile = 'sanity_discrete.submit'
+    supplyPSO.start()

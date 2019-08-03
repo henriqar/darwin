@@ -5,33 +5,35 @@ TIMETOWAIT="10"
 echo "sleeping for $TIMETOWAIT seconds"
 
 DARWINROOT="."
-OUT=""
-
 while [[ $# -gt 0 ]]
 do
 key="$1"
 
 case $key in
-    -root)
+  -root)
     DARWINROOT="$2"
     shift # past argument
     shift # past value
     ;;
-    -*)    # unknown option
-    OUT+="$key\n"
-    OUT+="$2\n"
+  -map1)    # unknown option
+    MAP1="$2"
     shift # past argument
     shift # past value
+    ;;
+  -map2)
+    MAP2="$2"
+    shift
+    shift
     ;;
 esac
 done
 
 function prog() {
-  echo -e $OUT 
-  echo -e $DARWINROOT 
+  echo -e "-map1 ${MAP1} -map2 ${MAP2} " 
+  echo -e "-root $DARWINROOT "
   pushd .
   cd $DARWINROOT
-  echo -e $OUT > output.txt
+  echo -e "${MAP1}\n${MAP2}" > output.txt
   popd
   /bin/sleep $TIMETOWAIT
 }

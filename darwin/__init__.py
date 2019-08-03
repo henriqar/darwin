@@ -199,7 +199,6 @@ class Algorithm():
 
     def _printData(self):
 
-        print('-'*80)
         print('darwin v{}\n'.format(__version__))
 
         print('Opt algorithm chosen -> ', self.data.optimization)
@@ -214,6 +213,12 @@ class Algorithm():
 
         print('Seed -> {}\n'.format(self.data.seed))
         logger.info('Seed -> {}'.format(self.seed))
+
+        if self.data.executor == drm.TaskSpooler:
+            print('Execution parallelism for TaskSpooler -> {}'.format(
+                self.config.parallelism))
+            logger.info('Execution parallelism for TaskSpooler -> {}'.format(
+                self.config.parallelism))
 
     # ABC specific information ------------------------------------------------
 

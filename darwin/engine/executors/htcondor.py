@@ -19,6 +19,7 @@ logger = logging.getLogger(__name__)
 class HTCondor(Executor):
     def __init__(self, config):
         super().__init__(config)
+        self.ids = []
         try:
             self.refresh_rate = int(self.submitf['darwin']['refresh_rate'])
         except (KeyError, NoSectionError, NoOptionError) as e:
@@ -37,7 +38,7 @@ class HTCondor(Executor):
             sys.exit(1)
 
         # secure the job id from condor
-        ids = []
+        self.ids = []
         for p in particles:
             arguments = p.coordinate.format()
             formatted_args = ['-{} {}'.format(k, v) for k,v in arguments.items()]
@@ -49,10 +50,13 @@ class HTCondor(Executor):
             with schedd.transaction() as txn:
                 ads = []
                 clusterid = sub.queue(txn, ad_results=ads)
-                ids.append(clusterid)
-                # self._schedd.spool(ads)
+                self.ids.append(clusterid)
 
-        req = ' || '.join('(ClusterId == {})'.format(id) for id in ids)
+                if 'should_transfer_files' in conf['htcondor'] and \
+                        conf['htcondor']['should_transfer_files'] in ('YES',):
+                    schedd.spool(ads)
+
+        req = ' || '.join('(ClusterId == {})'.format(id) for id in self.ids)
         proj = ['ClusterId', 'JobStatus']
 
         finished = False
@@ -67,7 +71,13 @@ class HTCondor(Executor):
 
         if 'should_transfer_files' in conf['htcondor'] and \
                 conf['htcondor']['should_transfer_files'] in ('YES',):
-            for clusterid in ids:
+            for clusterid in self.ids:
                 self._schedd.retrieve("ClusterId == %d".format(clusterid))
+
+    def _interruptHandler(self):
+        schedd = htcondor.Schedd()
+        req = ' || '.join('(ClusterId == {})'.format(id) for id in self.ids)
+        schedd.act(htcondor.JobAction.Remove, req)
+
 
 

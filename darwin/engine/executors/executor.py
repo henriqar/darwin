@@ -9,6 +9,7 @@ import sys
 import time
 import shutil
 import datetime
+import signal
 
 import darwin.engine.particles as particles
 
@@ -105,8 +106,22 @@ class Executor(abc.ABC):
         # stretegy reference
         self.strategy = None
 
+        # create signal interrup
+        signal.signal(signal.SIGINT, self._delegateInterruptHandler)
+
     def setStrategy(self, strategy):
         self.strategy = strategy
+
+    def _delegateInterruptHandler(self, signum, frame):
+        try:
+            self._interruptHandler()
+        finally:
+            sys.exit(1)
+
+    @abc.abstractmethod
+    def _interruptHandler(self):
+        logger.info('application finished via SIGINT or SIGKILL')
+        sys.exit(1)
 
     @abc.abstractmethod
     def _coreOptimization(self, handler, particles):

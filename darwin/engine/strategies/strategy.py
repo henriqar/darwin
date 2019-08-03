@@ -4,6 +4,7 @@ import logging
 import copy
 
 # from darwin.engine.particles import getBestFitness, getBestCoordinate
+import darwin.engine.space as universe
 import darwin.engine.particles as particles
 
 from itertools import chain
@@ -28,6 +29,10 @@ class Strategy():
         raise NotImplementedError
 
     def globalEvaluation(self, gfit, gcoord):
+
+        if gcoord is None:
+            gcoord = universe.getOrigin()
+
         particle = min(particles.particles(), key=lambda x: x.fitness)
         if particle.fitness < gfit:
             return (particle.fitness, copy.deepcopy(particle.coordinate))
