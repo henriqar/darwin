@@ -7,7 +7,7 @@
 [darwin]
 
 #executable=/bin/sleep
-executable=sanity_discrete.sh
+executable=sanityd.sh
 
 # always refresh on 'x' seconds, default: 60
 refresh_rate=3

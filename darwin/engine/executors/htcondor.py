@@ -26,7 +26,7 @@ class HTCondor(Executor):
             self.refresh_rate = 60
             logging.warning('refresh_rate not find, fallback to default: 60s')
 
-    def _coreOptimization(self, handler, particles):
+    def _coreExecution(self, handler, particles):
         schedd = htcondor.Schedd()
         conf = self.submitf
 
@@ -75,6 +75,9 @@ class HTCondor(Executor):
                 self._schedd.retrieve("ClusterId == %d".format(clusterid))
 
     def _interruptHandler(self):
+        self._cleanUp()
+
+    def _cleanUp(self):
         schedd = htcondor.Schedd()
         req = ' || '.join('(ClusterId == {})'.format(id) for id in self.ids)
         schedd.act(htcondor.JobAction.Remove, req)

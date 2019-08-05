@@ -19,12 +19,12 @@ Define the dictionary with all particles for the otimization problem. It will
 define a pool of particles and work using a batch approach for the execution
 of the optimization algorithms.
 """
-_particle_pool = collections.OrderedDict()
+_particle_pool = None
 
 """
 Define the global values used to classify the particles defined in this package
 """
-_global_fitness = sys.maxsize
+_global_fitness = None
 _global_coordinate = None
 _global_eval_function = None
 
@@ -33,6 +33,16 @@ def _securewd():
     savedwd = os.getcwd()
     yield
     os.chdir(savedwd)
+
+def init():
+    global _particle_pool
+    global _global_fitness
+    global _global_coordinate
+    global _global_eval_function
+    _particle_pool = collections.OrderedDict()
+    _global_fitness = sys.maxsize
+    _global_coordinate = None
+    _global_eval_function = None
 
 def size(algorithm, number):
     for _ in range(number):

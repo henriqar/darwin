@@ -3,30 +3,13 @@
 #   This file represents the way any user will submit any given file to the darwin 
 #   application. The executables should inform the absolute path of all files
 #
-
 [darwin]
 
 #executable=/bin/sleep
 executable=sanity
 
-# (TODO)
-# define the collector from htcondor to use
-collector=lsc.ic.unicamp.br
-
 # always refresh on 'x' seconds, default: 60
 refresh_rate=3
-
-# (TODO)
-# 1 execution medium time in seconds
-exec_time=6
-
-# DEPRE
-# define the job file structure to be created
-# dirs=logs
-
-# define the strategy to monitor agent job
-# can be: pool; event
-# agent_monitoring=pool
 
 # here we use all methods to delegate to condor
 # although the user shoukld take care of defining the directoires

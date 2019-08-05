@@ -38,8 +38,7 @@ def bigBang():
     space, else return the same instance (singleton)
     """
     global _universe
-    if _universe is None:
-        _universe = Space()
+    _universe = Space()
 
 def dimension():
     """

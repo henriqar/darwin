@@ -90,8 +90,9 @@ class Algorithm():
         self.config.optdir = 'darwin.opt'
         self.config.env = 'darwin.exec'
 
-        # create the solution space
+        # create the solution space and the particles api
         universe.bigBang()
+        particles.init()
 
         if hasattr(opt, algorithm):
             self.data.optimization = algorithm
@@ -155,6 +156,7 @@ class Algorithm():
             sys.exit(1)
         else:
             particles.size(self.data.optimization, number)
+            self.data.particles = number
 
     @Setter
     def iterations(self, max_itrs):
@@ -207,6 +209,9 @@ class Algorithm():
 
         print('DRM engine chosen -> {}'.format(self.data.executor))
         logger.info('DRM engine chosen -> {}'.format(self.data.executor))
+
+        print('Number of particles -> {}'.format(self.data.particles))
+        logger.info('Number of particles -> {}'.format(self.data.particles))
 
         print('Max iterations -> {}'.format(self.data.iterations))
         logger.info('Max iterations -> {}'.format(self.data.iterations))

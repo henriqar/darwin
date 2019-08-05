@@ -49,6 +49,7 @@ class TaskSpooler(Executor):
         elif sys.platform == 'darwin':
             self.comm = 'ts'
 
+        self.ids = []
         self.regex = re.compile(r"""^(\d+)\s+               # job id
                                      ([a-z]+)\s+            # state
                                      ([\a-zA-Z0-9_\.]+)\s+  # output file
@@ -63,7 +64,7 @@ class TaskSpooler(Executor):
             result.append(v)
         return result
 
-    def _coreOptimization(self, handler, particles):
+    def _coreExecution(self, handler, particles):
 
         conf = self.submitf
         executable = conf['darwin']['executable']
@@ -73,18 +74,18 @@ class TaskSpooler(Executor):
             sys.exit(1)
 
         with _parallelContext(self.comm, self.config.parallelism):
-            ids = []
+            self.ids = []
             for p in particles:
                 arguments = p.coordinate.format()
                 arguments['root'] = '{}'.format(handler.particlepath(p.name))
                 args = self._cmdPrepare(arguments)
                 jid = self._cmdSchedule(executable_path, args)
-                ids.append(jid)
-            while ids:
-                for jid in ids:
+                self.ids.append(jid)
+            while self.ids:
+                for jid in self.ids:
                     state = self._cmdJobState(jid)
                     if state == "finished":
-                        ids.remove(jid)
+                        self.ids.remove(jid)
                         self._cmdClearJob(jid)
                 time.sleep(self.refresh_rate)
 
@@ -135,4 +136,13 @@ class TaskSpooler(Executor):
         except sp.CalledProcessError:
             logger.error('taskspooler clear runtime error')
             sys.exit(1)
+
+    def _interruptHandler(self):
+        self._cleanUp()
+
+    def _cleanUp(self):
+        for jid in self.ids:
+            state = self._cmdJobState(jid)
+            if state == "finished":
+                self._cmdClearJob(jid)
 

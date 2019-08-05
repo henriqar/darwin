@@ -124,7 +124,11 @@ class Executor(abc.ABC):
         sys.exit(1)
 
     @abc.abstractmethod
-    def _coreOptimization(self, handler, particles):
+    def _coreExecution(self, handler, particles):
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    def _cleanUp(self):
         raise NotImplementedError
 
     @exectime('Total optimization time is')
@@ -135,9 +139,13 @@ class Executor(abc.ABC):
 
         for iteration in self.strategy.iterations():
             with Executor.Context(iteration, self.config) as handler:
-                self._coreOptimization(handler, particles.particles())
+                self._coreExecution(handler, particles.particles())
                 particles.evaluate(handler.iterationpath, self.strategy)
                 # self.strategy.fitnessEvaluation()
+
+        # set cleanUp to clean executors garbage left
+        self.strategy.cleanUp()
+        self._cleanUp()
 
 
 

@@ -28,6 +28,9 @@ class Strategy():
     def algorithm(self):
         raise NotImplementedError
 
+    def cleanUp(self):
+        pass
+
     def globalEvaluation(self, gfit, gcoord):
 
         if gcoord is None:
