@@ -48,6 +48,9 @@ def size(algorithm, number):
     for _ in range(number):
         _factory(algorithm)
 
+def total():
+    return len(_particle_pool.values())
+
 def _factory(optm):
     """
     Factory function to create the desired particle to be used in the
@@ -68,22 +71,6 @@ def _factory(optm):
 
     # global _particle_pool
     _particle_pool[instance.name] = instance
-
-# def _updateGlobalFitness(strategy):
-#     """
-#     Update the global fitness and coordinate if any particle performed better
-#     than the global result.
-#     """
-#     global _global_fitness
-#     global _global_coordinate
-#     _global_fitness, _global_coordinate = \
-#             strategy.globalEvaluation(_global_fitness, _global_coordinate)
-# particle = min(_particle_pool.values(), key=lambda x: x.fitness)
-# global _global_fitness
-# if particle.fitness < _global_fitness:
-#     global _global_coordinate
-#     _global_fitness = particle.fitness
-#     _global_coordinate = copy.deepcopy(particle.coordinate)
 
 def setEvaluationFunction(func):
     """

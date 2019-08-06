@@ -29,5 +29,8 @@ class Particle():
     def position(self, coord):
         self.coordinate = copy.deepcopy(coord)
 
+    def copyCoord(self):
+        return copy.deepcopy(self.coordinate)
+
 
 

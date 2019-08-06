@@ -225,23 +225,14 @@ class Algorithm():
             logger.info('Execution parallelism for TaskSpooler -> {}'.format(
                 self.config.parallelism))
 
-    # ABC specific information ------------------------------------------------
-
     @Setter
-    def trial_limit(self, value):
-        self.data.trial_limit = value
+    def mutationProbability(self, mut_prob):
 
-    # ABO specific information ------------------------------------------------
-
-    @Setter
-    def ratio_e(self, value):
-        self.data.ratio = value
-
-    @Setter
-    def step_e(self, value):
-        self.data.step_e = value
-
-    # BA specific information -------------------------------------------------
+        if mut_prob >= 0 or mut_prob <= 1:
+            self.data.mutation_probability = float(mut_prob)
+        else:
+            logger.error('mutation probabilty must be inside range [0,1]')
+            sys.exit(1)
 
     @Setter
     def minFrequency(self, value):
@@ -258,6 +249,59 @@ class Algorithm():
     @Setter
     def pulseRate(self, value):
         self.data.pulse_rate = value
+
+    @Setter
+    def mutationFactor(self, value):
+        self.data.mutation_factor = value
+
+    @Setter
+    def crossoverProbability(self, value):
+        self.data.crossover_probability = value
+
+    @Setter
+    def c1(self, value):
+        self.data.c1 = value
+
+    @Setter
+    def c2(self, value):
+        self.data.c2 = value
+
+    @Setter
+    def w(self, value):
+        self.data.w = value
+
+    @Setter
+    def w_min(self, value):
+        self.data.w_min = value
+
+    @Setter
+    def w_max(self, value):
+        self.data.w_max = value
+
+    @Setter
+    def initialTemperature(self, value):
+        self.data.initial_temperature = value
+
+    @Setter
+    def finalTemperature(self, value):
+        self.data.final_temperature = value
+
+
+    # ABC specific information ------------------------------------------------
+
+    @Setter
+    def trial_limit(self, value):
+        self.data.trial_limit = value
+
+    # ABO specific information ------------------------------------------------
+
+    @Setter
+    def ratio_e(self, value):
+        self.data.ratio = value
+
+    @Setter
+    def step_e(self, value):
+        self.data.step_e = value
 
     # BSA specific information ------------------------------------------------
 
@@ -301,32 +345,11 @@ class Algorithm():
     def alpha(self, value):
         self.data.alpha = value
 
-    # DE specific information -------------------------------------------------
-
-    @Setter
-    def mutation_factor(self, value):
-        self.data.mutation_factor = value
-
-    @Setter
-    def crossover_probability(self, value):
-        self.data.crossover_probability = value
-
     # FA specific information -------------------------------------------------
 
     @Setter
     def gamma(self, value):
         self.data.gamma = value
-
-    # GA specific information -------------------------------------------------
-
-    @Setter
-    def mutationProbability(self, mut_prob):
-
-        if mut_prob >= 0 or mut_prob <= 1:
-            self.data.mutation_probability = float(mut_prob)
-        else:
-            logger.error('mutation probabilty must be inside range [0,1]')
-            sys.exit(1)
 
     # GP specific information -------------------------------------------------
 
@@ -420,38 +443,6 @@ class Algorithm():
     @Setter
     def M(self, value):
         self.data.M = value
-
-    # PSO specific information ------------------------------------------------
-
-    @Setter
-    def c1(self, value):
-        self.data.c1 = value
-
-    @Setter
-    def c2(self, value):
-        self.data.c2 = value
-
-    @Setter
-    def w(self, value):
-        self.data.w = value
-
-    @Setter
-    def w_min(self, value):
-        self.data.w_min = value
-
-    @Setter
-    def w_max(self, value):
-        self.data.w_max = value
-
-    # SA specific information -------------------------------------------------
-
-    @Setter
-    def initialTemperature(self, value):
-        self.data.initial_temperature = value
-
-    @Setter
-    def finalTemperature(self, value):
-        self.data.final_temperature = value
 
     # WCA specific information ------------------------------------------------
 

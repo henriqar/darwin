@@ -26,11 +26,7 @@ class BlackHoleAlgorithm(Strategy):
         for p in particles.particles():
             p.fitness = p.intermediate
 
-    def globalEvaluation(self, gfit, gcoord):
-
-        if gcoord is None:
-            gcoord = universe.getOrigin()
-
+    def _innerGlobalEvaluation(self, gfit, gcoord):
         particle = min(particles.particles(), key=lambda x: x.fitness)
         if particle.fitness < gfit:
             new = (particle.fitness, copy.deepcopy(particle.coordinate))
@@ -38,6 +34,7 @@ class BlackHoleAlgorithm(Strategy):
             particle.position(gcoord)
             return new
         return (gfit, gcoord)
+        return None
 
     def algorithm(self):
 
@@ -52,7 +49,6 @@ class BlackHoleAlgorithm(Strategy):
         for iteration in range(data.iterations):
 
             summ = 0
-
             best = particles.getBestCoordinate()
             for p in particles.particles():
                 rand = np.random.uniform(0, 1)

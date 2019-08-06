@@ -31,15 +31,24 @@ class Strategy():
     def cleanUp(self):
         pass
 
-    def globalEvaluation(self, gfit, gcoord):
-
+    def _innerGlobalEvaluation(self, gfit, gcoord):
         if gcoord is None:
             gcoord = universe.getOrigin()
 
         particle = min(particles.particles(), key=lambda x: x.fitness)
         if particle.fitness < gfit:
-            return (particle.fitness, copy.deepcopy(particle.coordinate))
+            return (particle.fitness, particle.copyCoord())
         return (gfit, gcoord)
+
+    def globalEvaluation(self, gfit, gcoord):
+        if gcoord is None:
+            gcoord = universe.getOrigin()
+
+        glob = self._innerGlobalEvaluation(gfit, gcoord)
+        if glob is None:
+            return (gfit, gcoord)
+        else:
+            return glob
 
     def iterations(self):
         """
