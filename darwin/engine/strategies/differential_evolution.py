@@ -1,5 +1,4 @@
 
-import copy
 import datetime
 import logging
 import math
@@ -7,11 +6,11 @@ import numpy as np
 import sys
 import time
 
-from . import Strategy
 from . import printHeader, printInfo
+from . import Strategy
 
-import darwin.engine.space as universe
 import darwin.engine.particles as particles
+import darwin.engine.space as universe
 
 logger = logging.getLogger(__name__)
 
@@ -77,19 +76,13 @@ class DifferentialEvolution(Strategy):
         while c == index or b == c or c == a:
             c = np.random.uniform(0, 1) * (psize - 1)
 
-        try:
-            lp = particles.particles()
-            for i in range(universe.dimension()):
-                if np.random.uniform(0, 1) < self.data.mutation_factor:
-                    newc[i] = particle[i]
-                else:
-                    newc[i] = lp[math.floor(a)][i] + self.data.mutation_factor * \
-                            (lp[math.floor(b)][i] + lp[math.floor(c)][i])
-        except:
-            aaa = a
-            bbb = b
-            ccc = c
-            import pdb; pdb.set_trace()
+        lp = particles.particles()
+        for i in range(universe.dimension()):
+            if np.random.uniform(0, 1) < self.data.mutation_factor:
+                newc[i] = particle[i]
+            else:
+                newc[i] = lp[math.floor(a)][i] + self.data.mutation_factor * \
+                        (lp[math.floor(b)][i] + lp[math.floor(c)][i])
 
         # ensure values are inbound
         newc.inbounds()

@@ -4,27 +4,13 @@
 #   application. The executables should inform the absolute path of all files
 #
 [darwin]
-
-#executable=/bin/sleep
 executable=sanity
-
-# always refresh on 'x' seconds, default: 60
 refresh_rate=3
 
-# here we use all methods to delegate to condor
-# although the user shoukld take care of defining the directoires
-# and how the program work
 [htcondor]
-
 universe=vanilla
-
-#error=%(darwin_ag)s/logs/err.$(ClusterId)
 error=err.$(ClusterId)
-
-#output=%(darwin_ag)s/logs/out.$(ClusterId)
 output=out.$(ClusterId)
-
-#log=%(darwin_ag)s/logs/log.$(ClusterId)
 log=log.$(ClusterId)
 
 #initialdir=files
