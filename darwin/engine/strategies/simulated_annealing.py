@@ -16,14 +16,6 @@ from darwin.constants import cooling
 
 logger = logging.getLogger(__name__)
 
-def header_output(iteration, fitness, elapsed_time):
-    print(' {:13s} {:20s} {:25s}'.format(
-        iteration, fitness, str(elapsed_time)))
-
-def info_output(iteration, max_itrs, fitness, elapsed_time):
-    print(' {:<13d} {:<20f} {:<25s}'.format(
-        iteration, fitness, str(elapsed_time)))
-
 class SimulatedAnnealing(Strategy):
     def __init__(self, data):
         super().__init__(data)

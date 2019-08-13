@@ -78,7 +78,7 @@ class DifferentialEvolution(Strategy):
 
         lp = particles.particles()
         for i in range(universe.dimension()):
-            if np.random.uniform(0, 1) < self.data.mutation_factor:
+            if np.random.uniform(0, 1) < self.data.crossover_probability:
                 newc[i] = particle[i]
             else:
                 newc[i] = lp[math.floor(a)][i] + self.data.mutation_factor * \

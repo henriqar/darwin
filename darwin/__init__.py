@@ -217,7 +217,7 @@ class Algorithm():
         logger.info('Max iterations -> {}'.format(self.data.iterations))
 
         print('Seed -> {}\n'.format(self.data.seed))
-        logger.info('Seed -> {}'.format(self.seed))
+        logger.info('Seed -> {}'.format(self.data.seed))
 
         if self.data.executor == drm.TaskSpooler:
             print('Execution parallelism for TaskSpooler -> {}'.format(

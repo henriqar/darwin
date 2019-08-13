@@ -14,6 +14,8 @@ from .particle import Particle
 __all__ = ['Particle', 'size', 'evaluate', 'particles', 'setEvaluationFunction',
         'getBestFitness', 'getBestCoordinate']
 
+logger = logging.getLogger(__name__)
+
 """
 Define the dictionary with all particles for the otimization problem. It will
 define a pool of particles and work using a batch approach for the execution
@@ -94,6 +96,7 @@ def evaluate(root, strategy):
     can apply the evaluation scheme intended to the particle.
     """
     with _securewd():
+        logger.info('Iteration Fitness Results:')
         for name, particle in _particle_pool.items():
             ppath = os.path.join(root, name)
             os.chdir(ppath)
@@ -103,6 +106,8 @@ def evaluate(root, strategy):
                     fitness))
                 sys.exit(1)
             particle.intermediate = fitness
+            logger.info('\tfitness: {0} coordinate: {1!r}'.format(
+                fitness, particle.coordinate))
 
     # after evaluating, update global fitness
     global _global_fitness
@@ -110,6 +115,8 @@ def evaluate(root, strategy):
     strategy.evaluation()
     _global_fitness, _global_coordinate = \
             strategy.globalEvaluation(_global_fitness, _global_coordinate)
+    logger.info('\tbest fitness: {0} coordinate: {1!r}'.format(
+        _global_fitness, _global_coordinate))
 
 def particles():
     """

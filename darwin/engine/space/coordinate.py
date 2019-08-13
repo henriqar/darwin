@@ -36,12 +36,19 @@ class Coordinate():
     def __len__(self):
         return len(self._points)
 
-    def __repr__(self):
+    def __str__(self):
         arguments = []
         for i, ref in Coordinate.__universe.axes():
             p = self._points[i]
             arguments.append('{}: {}'.format(ref.name, ref.map.format(p)))
         return '\n'.join(arguments)
+
+    def __repr__(self):
+        arguments = []
+        for i, ref in Coordinate.__universe.axes():
+            p = self._points[i]
+            arguments.append('{}: {}'.format(ref.name, ref.map.format(p)))
+        return '(' + ','.join(arguments) + ')'
 
     def set(self, points):
         assert isinstance(points, (tuple, list))
