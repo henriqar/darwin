@@ -1,3 +1,4 @@
 pytest>=4.4.0
 numpy>=1.16.2
 htcondor>=8.9.0
+tinydb>=3.15
