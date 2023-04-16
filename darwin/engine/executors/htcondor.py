@@ -17,8 +17,8 @@ logger = logging.getLogger(__name__)
 
 # context in strategy pattern
 class HTCondor(Executor):
-    def __init__(self, config):
-        super().__init__(config)
+    def __init__(self, config, use_auto_submit):
+        super().__init__(config, use_auto_submit)
         self.ids = []
         try:
             self.refresh_rate = int(self.submitf['darwin']['refresh_rate'])

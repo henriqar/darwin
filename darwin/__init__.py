@@ -14,14 +14,14 @@ import darwin.engine.particles as particles
 
 from darwin.engine.space import Coordinate
 
-from .constants import drm, opt, cooling
+from .constants import drm, opt, cooling, auto
 from .version import __version__
 
 """
 Define the import __all__ for the darwin package, limiting what the public
 API will be.
 """
-__all__ = ['drm', 'opt', 'cooling', 'Algorithm']
+__all__ = ['drm', 'opt', 'cooling', 'auto', 'Algorithm']
 
 """
 Define the root logger and all handlers that will be used: file handler and
@@ -82,6 +82,7 @@ class Algorithm():
         self.data = Data()
         self.data.iterations = 10
         self.data.executor = drm.TaskSpooler
+        self.data.autosubmitfile = auto.Disable
 
         self.config = Data()
         self.config.timeout = 3600
@@ -167,6 +168,14 @@ class Algorithm():
         self.config.submitfile = name
 
     @Setter
+    def autoSubmitFile(self, var):
+        if not hasattr(auto, var):
+            logger.error('unexpected auto submit value {}'.format(var))
+            sys.exit(1)
+        else:
+            self.data.autosubmitfile = var
+
+    @Setter
     def optmizationDirectory(self, name):
         self.config.optdir = name
 
@@ -191,7 +200,7 @@ class Algorithm():
 
         # create strategy and executor
         algorithm = strategies.factory(self.data.optimization, self.data)
-        executor = executors.factory(self.data.executor, self.config)
+        executor = executors.factory(self.data.executor, self.config, self.data.autosubmitfile == auto.SubmitFile)
         executor.setStrategy(algorithm)
 
         # print and log information

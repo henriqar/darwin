@@ -36,8 +36,8 @@ class TaskSpooler(Executor):
             self.output = output
             self.times = times
 
-    def __init__(self, config):
-        super().__init__(config)
+    def __init__(self, config, use_auto_submit):
+        super().__init__(config, use_auto_submit)
         try:
             self.refresh_rate = int(self.submitf['darwin']['refresh_rate'])
         except (KeyError, NoSectionError, NoOptionError) as e:

@@ -15,6 +15,21 @@ import darwin.engine.particles as particles
 
 from darwin.constants import drm
 
+AUTO_SUBMIT_FILE = \
+"""
+[darwin]
+ executable=autoexecutor
+ refresh_rate=3
+ #exec_time=60
+
+ [htcondor]
+ universe=vanilla
+ error=err.$(ClusterId)
+ output=out.$(ClusterId)
+ log=log.$(ClusterId)
+ #should_transfer_files = YES
+"""
+
 logger = logging.getLogger(__name__)
 
 def exectime(line):
@@ -89,7 +104,7 @@ class Executor(abc.ABC):
             # particles.evaluate(self.iterationpath, self.strategy)
             pass
 
-    def __init__(self, config):
+    def __init__(self, config, use_auto_submit):
 
         # verify if submit file exists
         if not os.path.isfile(config.submitfile):
@@ -98,10 +113,14 @@ class Executor(abc.ABC):
 
         # save the config
         self.config = config
-
-        # get the submit file for the darwin application
         self.submitf = configparser.ConfigParser()
-        self.submitf.read(config.submitfile)
+
+        if not use_auto_submit:
+            # get the submit file for the darwin application
+            self.submitf.read(config.submitfile)
+        else:
+            logger.info("Using auto submit file")
+            self.submitf.read_string(AUTO_SUBMIT_FILE)
 
         # stretegy reference
         self.strategy = None

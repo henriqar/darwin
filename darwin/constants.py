@@ -14,7 +14,11 @@ class _Constants:
 
 drm = _Constants()
 opt = _Constants()
+auto = _Constants()
 cooling = _Constants()
+
+auto.SubmitFile = 'SubmitFile'
+auto.Disable = 'Disable'
 
 drm.TaskSpooler = 'TaskSpooler'
 drm.HTCondor = 'HTCondor'

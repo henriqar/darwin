@@ -26,6 +26,21 @@ def test_htcondor_ba_continuous(supplyFitnessFunction):
     ba.submitFile = 'sanity.submit'
     ba.start()
 
+def test_htcondor_ba_continuous_autosubmit(supplyFitnessFunction):
+    ba = darwin.Algorithm(darwin.opt.BatAlgorithm)
+    ba.maxFrequency = np.random.uniform(0.3, 0.8)
+    ba.minFrequency = np.random.uniform(0.2, 0.5)
+    ba.pulseRate = np.random.uniform(0.3, 0.98)
+    ba.loudness = np.random.uniform(0.5, 1.5)
+    ba.particles = np.random.randint(5, 20)
+    ba.iterations = np.random.randint(5, 15)
+    ba.executionEngine = darwin.drm.HTCondor
+    ba.addVariable('x', x)
+    ba.addVariable('y', y)
+    ba.function = supplyFitnessFunction
+    ba.autoSubmitFile = darwin.auto.SubmitFile
+    ba.start()
+
 def test_htcondor_ba_discrete(supplyDiscreteFitnessFunction):
     ba = darwin.Algorithm(darwin.opt.BatAlgorithm)
     ba.maxFrequency = np.random.uniform(0.3, 0.8)
